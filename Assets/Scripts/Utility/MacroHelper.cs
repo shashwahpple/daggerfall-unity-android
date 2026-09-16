@@ -13,8 +13,6 @@ using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Player;
 using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
-using UnityEngine;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
 using System.Text;

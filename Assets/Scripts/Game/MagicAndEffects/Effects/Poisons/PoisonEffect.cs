@@ -12,7 +12,6 @@
 using UnityEngine;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallConnect;
 using FullSerializer;
 

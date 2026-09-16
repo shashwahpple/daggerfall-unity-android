@@ -9,12 +9,10 @@
 // Notes:
 //
 
-using System;
-
 namespace DaggerfallWorkshop.Localization
 {
     //  Note: Will expand and change over time until localization is complete.
-    
+
     /// <summary>
     /// Legacy text sources from classic Daggerfall.
     /// Used to reference where a text resource originated from.

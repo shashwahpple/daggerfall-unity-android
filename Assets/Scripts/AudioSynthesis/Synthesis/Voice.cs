@@ -1,5 +1,4 @@
-﻿using System;
-using DaggerfallWorkshop.AudioSynthesis.Bank.Patches;
+﻿using DaggerfallWorkshop.AudioSynthesis.Bank.Patches;
 
 namespace DaggerfallWorkshop.AudioSynthesis.Synthesis
 {

@@ -2,8 +2,7 @@
 {
     using System;
     using DaggerfallWorkshop.AudioSynthesis.Bank.Descriptors;
-    using DaggerfallWorkshop.AudioSynthesis.Synthesis;
-    
+
     public class Flanger : IAudioEffect
     {
         private Lfo lfo;

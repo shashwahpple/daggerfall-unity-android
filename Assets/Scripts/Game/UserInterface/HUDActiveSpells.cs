@@ -9,7 +9,6 @@
 // Notes:
 //
 
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using DaggerfallWorkshop.Game.MagicAndEffects;

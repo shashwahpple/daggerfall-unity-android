@@ -16,7 +16,6 @@ using DaggerfallConnect.Arena2;
 using DaggerfallConnect.Utility;
 using DaggerfallWorkshop.Game.Player;
 using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Game.Formulas;
 using DaggerfallWorkshop;
 
 namespace DaggerfallConnect.Save

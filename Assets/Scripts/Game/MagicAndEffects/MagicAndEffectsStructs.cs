@@ -11,7 +11,6 @@
 
 using System;
 using DaggerfallConnect;
-using DaggerfallConnect.Arena2;
 using DaggerfallConnect.FallExe;
 
 namespace DaggerfallWorkshop.Game.MagicAndEffects

@@ -10,7 +10,6 @@
 //
 
 using UnityEngine;
-using System.Collections;
 
 ///Attach to parent gameobject that isn't already updated by floating origin.
 ///Will update the transform position + any particles, unless bools are set to false.

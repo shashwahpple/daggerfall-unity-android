@@ -10,7 +10,6 @@
 //
 
 using UnityEngine;
-using System.Collections;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.Entity;
 

@@ -10,7 +10,6 @@
 // 
 
 using System.Text.RegularExpressions;
-using DaggerfallWorkshop.Game.Questing;
 using FullSerializer;
 using System;
 

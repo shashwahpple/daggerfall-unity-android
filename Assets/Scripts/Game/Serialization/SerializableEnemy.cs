@@ -11,9 +11,6 @@
 
 using UnityEngine;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using FullSerializer;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Questing;
 using DaggerfallWorkshop.Game.MagicAndEffects;

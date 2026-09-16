@@ -9,11 +9,8 @@
 // Notes:
 //
 
-using UnityEngine;
-using System.Collections;
 using System.Text.RegularExpressions;
 using System;
-using DaggerfallConnect;
 using FullSerializer;
 
 using DaggerfallWorkshop.Utility;

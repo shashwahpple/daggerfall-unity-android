@@ -10,7 +10,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Game.MagicAndEffects;
 

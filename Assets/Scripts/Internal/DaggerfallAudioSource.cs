@@ -10,13 +10,6 @@
 //
 
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using System;
-using System.IO;
-using DaggerfallConnect;
-using DaggerfallConnect.Utility;
-using DaggerfallConnect.Arena2;
 using UnityEngine.Audio;
 
 namespace DaggerfallWorkshop

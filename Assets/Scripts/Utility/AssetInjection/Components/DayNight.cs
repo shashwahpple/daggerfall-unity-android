@@ -11,7 +11,6 @@
 
 using System;
 using UnityEngine;
-using DaggerfallWorkshop;
 
 namespace DaggerfallWorkshop.Utility.AssetInjection
 {

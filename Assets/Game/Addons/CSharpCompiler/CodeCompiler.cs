@@ -2,10 +2,8 @@
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection.Emit;
-using System.Linq;
 using System.Text;
 
 namespace CSharpCompiler

@@ -11,7 +11,6 @@
 
 using UnityEngine;
 using DaggerfallConnect;
-using DaggerfallConnect.FallExe;
 using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Utility;

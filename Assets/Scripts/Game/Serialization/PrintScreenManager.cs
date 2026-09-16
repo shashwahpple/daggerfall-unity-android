@@ -13,17 +13,6 @@ using UnityEngine;
 using System;
 using System.IO;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using DaggerfallConnect;
-using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Game.Items;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
-using DaggerfallWorkshop.Game.Formulas;
-using DaggerfallWorkshop.Game.MagicAndEffects;
-using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
-using DaggerfallWorkshop.Game.Utility;
-using DaggerfallWorkshop.Utility;
 
 namespace DaggerfallWorkshop.Game.Serialization
 {

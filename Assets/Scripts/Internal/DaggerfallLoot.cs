@@ -18,7 +18,6 @@ using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.MagicAndEffects;
 using DaggerfallWorkshop.Game.Formulas;
 using DaggerfallConnect.FallExe;
-using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Questing;
 
 namespace DaggerfallWorkshop

@@ -11,8 +11,6 @@
 
 using UnityEngine;
 using System;
-using System.Collections;
-using DaggerfallWorkshop;
 using DaggerfallConnect;
 using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game.Weather;

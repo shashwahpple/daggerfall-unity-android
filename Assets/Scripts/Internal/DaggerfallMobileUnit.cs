@@ -14,8 +14,6 @@ using UnityEditor;
 #endif
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-using System;
 using System.IO;
 using DaggerfallConnect;
 using DaggerfallConnect.Utility;
@@ -34,7 +32,7 @@ namespace DaggerfallWorkshop
     /// only be attached to a child GameObject.
     /// Uses parent GameObject to determine actual facing in world.
     /// </summary>
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     [ExecuteInEditMode]
     #endif
     [RequireComponent(typeof(MeshFilter))]

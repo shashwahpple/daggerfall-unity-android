@@ -1,4 +1,3 @@
-using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Serialization;
 using System.Collections.Generic;
 using System.Linq;

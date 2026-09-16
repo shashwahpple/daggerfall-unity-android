@@ -9,11 +9,9 @@
 // Notes:
 //
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DaggerfallWorkshop.Game.Questing;
-using DaggerfallConnect;
 
 namespace DaggerfallWorkshop.Game.UserInterface
 {

@@ -10,10 +10,7 @@
 //
 
 using UnityEngine;
-using DaggerfallConnect;
-using DaggerfallConnect.Utility;
 using DaggerfallConnect.Arena2;
-using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Utility;
 

@@ -9,7 +9,6 @@
 // Notes:
 //
 
-using UnityEngine;
 using System;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Serialization;

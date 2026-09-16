@@ -8,7 +8,6 @@
 
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallConnect.Arena2;
 

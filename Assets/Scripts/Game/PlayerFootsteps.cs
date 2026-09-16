@@ -10,7 +10,6 @@
 //
 
 using UnityEngine;
-using System.Collections;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;

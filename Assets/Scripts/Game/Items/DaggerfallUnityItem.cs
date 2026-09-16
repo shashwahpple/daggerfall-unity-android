@@ -17,10 +17,8 @@ using DaggerfallConnect.FallExe;
 using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Questing;
-using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.MagicAndEffects;
 using DaggerfallWorkshop.Game.Formulas;
-using UnityEngine;
 
 namespace DaggerfallWorkshop.Game.Items
 {

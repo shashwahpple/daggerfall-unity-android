@@ -11,22 +11,10 @@
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using DaggerfallConnect;
-using DaggerfallConnect.Arena2;
 using DaggerfallConnect.Utility;
-using DaggerfallConnect.FallExe;
-using DaggerfallWorkshop;
-using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.UserInterface;
-using DaggerfallWorkshop.Game.Player;
-using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
 using DaggerfallWorkshop.Utility.AssetInjection;
 

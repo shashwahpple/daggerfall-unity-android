@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -6,7 +5,6 @@ using System;
 using Newtonsoft.Json;
 using System.Linq;
 using UnityEngine.UI;
-using NativeFilePickerNamespace;
 
 namespace DaggerfallWorkshop.Game
 {

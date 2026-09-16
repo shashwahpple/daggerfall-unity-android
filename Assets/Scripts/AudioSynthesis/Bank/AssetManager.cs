@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Collections.Generic;
-using DaggerfallWorkshop.AudioSynthesis.Wave;
+﻿using System.Collections.Generic;
 
 namespace DaggerfallWorkshop.AudioSynthesis.Bank
 {

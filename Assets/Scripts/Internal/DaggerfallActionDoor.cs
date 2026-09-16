@@ -13,7 +13,6 @@ using UnityEngine;
 using System.Collections;
 using DaggerfallConnect;
 using DaggerfallWorkshop.Game;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Formulas;
 using DaggerfallWorkshop.Game.Utility;

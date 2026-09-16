@@ -8,8 +8,6 @@
 using UnityEngine;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.UserInterface;
-using DaggerfallWorkshop.Game.Items;
-using DaggerfallWorkshop.Game.Banking;
 using DaggerfallConnect.Utility;
 
 namespace DaggerfallWorkshop.Game.UserInterfaceWindows

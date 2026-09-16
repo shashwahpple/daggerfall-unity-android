@@ -11,10 +11,8 @@
 
 using UnityEngine;
 using System;
-using System.Collections;
 using System.Reflection;
 using System.Collections.Generic;
-using System.Text;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.Serialization;

@@ -11,7 +11,6 @@
 
 using UnityEngine;
 using DaggerfallWorkshop.Game;
-using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
 
 namespace DaggerfallWorkshop

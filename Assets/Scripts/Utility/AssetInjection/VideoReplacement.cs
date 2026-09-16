@@ -10,7 +10,6 @@
 //
 
 using System.IO;
-using UnityEngine;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
 using UnityEngine.Video;
 using DaggerfallWorkshop.Game.UserInterface;

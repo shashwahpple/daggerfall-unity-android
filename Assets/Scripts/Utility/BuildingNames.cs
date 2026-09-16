@@ -10,10 +10,7 @@
 //
 
 using DaggerfallConnect;
-using DaggerfallConnect.Arena2;
-using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Formulas;
-using DaggerfallWorkshop.Game.Utility;
 
 namespace DaggerfallWorkshop.Utility
 {

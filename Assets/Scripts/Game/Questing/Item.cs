@@ -10,13 +10,11 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallConnect.Arena2;
-using DaggerfallConnect.FallExe;
 using FullSerializer;
 using DaggerfallWorkshop.Game.Guilds;
 

@@ -12,7 +12,6 @@
 using UnityEngine;
 using DaggerfallWorkshop.Game.MagicAndEffects;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
-using DaggerfallWorkshop.Game.Questing;
 
 namespace DaggerfallWorkshop.Game.Entity
 {

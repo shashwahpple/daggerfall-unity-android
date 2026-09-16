@@ -19,8 +19,6 @@ using UnityEngine.Localization.Settings;
 using Wenzil.Console;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.Entity;
-using UnityEngine.Localization.Tables;
-using DaggerfallWorkshop.Game.MagicAndEffects;
 
 namespace DaggerfallWorkshop.Game
 {

@@ -1,8 +1,4 @@
-using DaggerfallConnect;
-using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Utility;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DaggerfallWorkshop.Game

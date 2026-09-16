@@ -16,7 +16,6 @@ using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.MagicAndEffects;
 using System.Collections.Generic;
 using System.Linq;
-using DaggerfallWorkshop.Game.Items;
 using DaggerfallConnect.Arena2;
 
 namespace DaggerfallWorkshop.Game.Serialization

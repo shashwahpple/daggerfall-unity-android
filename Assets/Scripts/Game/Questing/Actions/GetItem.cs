@@ -12,7 +12,6 @@
 using UnityEngine;
 using System.Text.RegularExpressions;
 using DaggerfallWorkshop.Game.Items;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using FullSerializer;
 
 namespace DaggerfallWorkshop.Game.Questing.Actions

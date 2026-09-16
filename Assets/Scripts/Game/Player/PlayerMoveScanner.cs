@@ -9,13 +9,7 @@
 // Notes: This class detects information about where the player is going to step
 //
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using DaggerfallWorkshop.Game.Serialization;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
-using DaggerfallWorkshop.Game.Entity;
 
 namespace DaggerfallWorkshop.Game
 {

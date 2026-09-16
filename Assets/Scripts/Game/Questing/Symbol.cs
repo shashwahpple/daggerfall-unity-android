@@ -10,9 +10,6 @@
 //
 
 using UnityEngine;
-using System;
-using System.Collections;
-using System.Text.RegularExpressions;
 
 namespace DaggerfallWorkshop.Game.Questing
 {

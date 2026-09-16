@@ -14,7 +14,6 @@ using UnityEditor;
 #endif
 using UnityEngine;
 using System.IO;
-using System.Collections;
 using DaggerfallConnect;
 using DaggerfallConnect.Utility;
 using DaggerfallConnect.Arena2;

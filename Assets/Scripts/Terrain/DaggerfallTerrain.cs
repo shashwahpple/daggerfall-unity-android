@@ -11,7 +11,6 @@
 
 using UnityEngine;
 using System;
-using DaggerfallConnect;
 using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Utility;
 using Unity.Collections;

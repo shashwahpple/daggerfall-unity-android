@@ -10,12 +10,8 @@
 //
 
 using UnityEngine;
-using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
 using DaggerfallConnect.Arena2;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Utility;
 
 namespace DaggerfallWorkshop.Game.UserInterface

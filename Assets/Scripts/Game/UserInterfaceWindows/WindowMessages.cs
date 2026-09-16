@@ -9,8 +9,6 @@
 // Notes:
 //
 
-using System;
-
 namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 {
     public class WindowMessages

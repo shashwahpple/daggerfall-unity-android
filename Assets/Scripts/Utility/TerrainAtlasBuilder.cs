@@ -13,13 +13,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using System;
 using System.IO;
-using System.Collections;
-using System.Collections.Generic;
-using DaggerfallConnect;
-using DaggerfallConnect.Utility;
-using DaggerfallConnect.Arena2;
 
 namespace DaggerfallWorkshop.Utility
 {

@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.IO;
-using System.Collections;
 using DaggerfallConnect;
 using DaggerfallConnect.Arena2;
 using DaggerfallConnect.Utility;

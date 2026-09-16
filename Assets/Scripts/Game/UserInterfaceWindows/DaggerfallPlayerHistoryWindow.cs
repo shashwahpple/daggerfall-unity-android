@@ -10,13 +10,8 @@
 
 using UnityEngine;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game.UserInterface;
-using DaggerfallWorkshop.Game.Items;
-using System.IO;
-using System.Text.RegularExpressions;
 
 namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 {

@@ -15,7 +15,6 @@ using System.IO;
 using System.Collections.Generic;
 using DaggerfallConnect.Utility;
 using DaggerfallWorkshop;
-using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Questing;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Utility.AssetInjection;

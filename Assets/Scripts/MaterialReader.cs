@@ -11,16 +11,10 @@
 
 using UnityEngine;
 #if UNITY_EDITOR
-using UnityEditor;
 #endif
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using DaggerfallConnect;
 using DaggerfallConnect.Utility;
-using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Utility.AssetInjection;
 

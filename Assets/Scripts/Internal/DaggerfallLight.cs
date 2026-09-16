@@ -10,11 +10,7 @@
 //
 
 using UnityEngine;
-using System;
 using System.Collections;
-using DaggerfallConnect;
-using DaggerfallConnect.Utility;
-using DaggerfallConnect.Arena2;
 
 namespace DaggerfallWorkshop
 {

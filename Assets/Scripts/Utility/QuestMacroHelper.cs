@@ -9,14 +9,11 @@
 // Notes:
 //
 
-using UnityEngine;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Questing;
 using DaggerfallConnect.Arena2;
-using DaggerfallWorkshop.Game.Player;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 
 namespace DaggerfallWorkshop.Utility
 {

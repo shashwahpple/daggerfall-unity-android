@@ -12,14 +12,10 @@
 using UnityEngine;
 using System;
 using System.IO;
-using System.Collections;
-using System.Collections.Generic;
 using DaggerfallConnect.Save;
-using DaggerfallWorkshop;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.Utility;
-using DaggerfallWorkshop.Game.Serialization;
 
 namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 {

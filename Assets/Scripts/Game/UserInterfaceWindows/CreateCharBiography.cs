@@ -12,13 +12,8 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
-using DaggerfallConnect;
 using DaggerfallConnect.Arena2;
-using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game.UserInterface;
-using DaggerfallWorkshop.Utility.AssetInjection;
-using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Game.Items;
 using DaggerfallWorkshop.Game.Player;
 
 namespace DaggerfallWorkshop.Game.UserInterfaceWindows

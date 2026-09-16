@@ -19,7 +19,6 @@ using DaggerfallWorkshop.Game.Items;
 using System.Collections.Generic;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.MagicAndEffects;
-using DaggerfallWorkshop.Game.Formulas;
 using DaggerfallConnect.FallExe;
 
 namespace DaggerfallWorkshop.Game.UserInterfaceWindows

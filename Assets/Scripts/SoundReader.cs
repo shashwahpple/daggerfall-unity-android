@@ -10,12 +10,9 @@
 //
 
 using UnityEngine;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using DaggerfallConnect;
-using DaggerfallConnect.Utility;
 using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Utility.AssetInjection;
 

@@ -9,7 +9,6 @@ using System;
 using DaggerfallWorkshop.Utility;
 using DaggerfallConnect.Arena2;
 using System.Collections.Generic;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using UnityEngine;
 using DaggerfallConnect.FallExe;
 using DaggerfallWorkshop.Game.Utility;

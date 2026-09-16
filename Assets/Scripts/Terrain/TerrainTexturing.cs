@@ -14,7 +14,6 @@ using System;
 using DaggerfallConnect.Arena2;
 using Unity.Jobs;
 using Unity.Collections;
-using Unity.Mathematics;
 
 namespace DaggerfallWorkshop
 {

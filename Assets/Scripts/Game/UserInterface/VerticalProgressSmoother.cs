@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using DaggerfallWorkshop.Game.Serialization;
 
 namespace DaggerfallWorkshop.Game.UserInterface
 {

@@ -9,7 +9,6 @@
 // Notes:
 //
 
-using System;
 using UnityEngine;
 using System.Text.RegularExpressions;
 using DaggerfallWorkshop.Utility;

@@ -9,10 +9,8 @@
 // Notes:
 //
 
-using System;
 using UnityEngine;
 using DaggerfallWorkshop.Game.UserInterface;
-using DaggerfallWorkshop.Utility.AssetInjection;
 using DaggerfallWorkshop.Game.MagicAndEffects;
 
 namespace DaggerfallWorkshop.Game.UserInterfaceWindows

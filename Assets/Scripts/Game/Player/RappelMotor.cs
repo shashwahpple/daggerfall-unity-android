@@ -1,6 +1,4 @@
 using DaggerfallConnect;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DaggerfallWorkshop.Game

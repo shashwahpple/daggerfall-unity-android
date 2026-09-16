@@ -9,7 +9,6 @@
  *  Used for midi input using short messages. 
  *  Tempo is calculated by the input device so the messages are all processed at the same time with: FillSequencerQueue(...)
  */
-using System.Collections.Generic;
 using DaggerfallWorkshop.AudioSynthesis.Synthesis;
 
 namespace DaggerfallWorkshop.AudioSynthesis.Sequencer

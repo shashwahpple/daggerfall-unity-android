@@ -14,18 +14,11 @@
 
 using UnityEngine;
 using System;
-using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using DaggerfallConnect;
-using DaggerfallConnect.Arena2;
-using DaggerfallConnect.Utility;
-using DaggerfallWorkshop;
 using DaggerfallWorkshop.Utility;
-using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.UserInterfaceWindows;
-using DaggerfallWorkshop.Game.Player;
-using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallWorkshop.Game.Utility;
 using Wenzil.Console;

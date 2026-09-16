@@ -7,7 +7,6 @@
 // Contributors:    
 
 using System;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using System.Collections.Generic;
 using DaggerfallWorkshop.Game.UserInterface;
 

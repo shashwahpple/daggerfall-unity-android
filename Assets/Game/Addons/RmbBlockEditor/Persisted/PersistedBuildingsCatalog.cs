@@ -8,8 +8,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using DaggerfallWorkshop.Game.Utility.ModSupport;
 using DaggerfallWorkshop.Utility.AssetInjection;
 using Newtonsoft.Json;
 using UnityEngine;

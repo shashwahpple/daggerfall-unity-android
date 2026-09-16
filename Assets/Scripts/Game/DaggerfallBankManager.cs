@@ -19,8 +19,6 @@ using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallWorkshop.Game.Items;
 using DaggerfallConnect.Utility;
 using DaggerfallConnect;
-using DaggerfallConnect.Arena2;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.Formulas;
 
 namespace DaggerfallWorkshop.Game.Banking

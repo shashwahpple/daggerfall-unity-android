@@ -1,8 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-using DaggerfallWorkshop.Game;
-
-namespace DaggerfallWorkshop.Game.UserInterface
+﻿namespace DaggerfallWorkshop.Game.UserInterface
 {
 
     public class HUDFlickerSlow : HUDFlickerBase

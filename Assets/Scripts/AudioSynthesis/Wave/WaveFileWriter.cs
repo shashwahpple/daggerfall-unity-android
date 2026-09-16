@@ -1,7 +1,6 @@
 ﻿namespace DaggerfallWorkshop.AudioSynthesis.Wave
 {
     using System;
-    using System.Diagnostics;
     using System.IO;
 
     public sealed class WaveFileWriter : IDisposable

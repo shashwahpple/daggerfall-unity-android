@@ -19,7 +19,6 @@ using DaggerfallConnect.FallExe;
 using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Utility.AssetInjection;
-using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Formulas;
 
 namespace DaggerfallWorkshop.Game.Items

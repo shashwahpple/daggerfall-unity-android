@@ -9,11 +9,8 @@
 // Notes:
 //
 
-using System;
 using UnityEngine;
 using DaggerfallWorkshop.Utility;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
-using DaggerfallWorkshop.Game.Entity;
 
 namespace DaggerfallWorkshop.Game.Utility
 {

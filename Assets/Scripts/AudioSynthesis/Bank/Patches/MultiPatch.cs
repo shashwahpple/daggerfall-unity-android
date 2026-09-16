@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using DaggerfallWorkshop.AudioSynthesis.Synthesis;
 using DaggerfallWorkshop.AudioSynthesis.Sf2;
 

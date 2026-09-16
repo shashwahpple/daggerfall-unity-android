@@ -9,7 +9,6 @@
 // Notes:
 //
 
-using System;
 using DaggerfallConnect;
 using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game.Utility;

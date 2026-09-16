@@ -9,14 +9,11 @@
 // Notes:
 //
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using DaggerfallWorkshop.Game.Questing;
 using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallWorkshop.Game.Player;
 using DaggerfallWorkshop.Utility;
-using DaggerfallConnect;
 
 namespace DaggerfallWorkshop.Game.UserInterface
 {

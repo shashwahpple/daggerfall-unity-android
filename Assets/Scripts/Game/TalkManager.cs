@@ -26,7 +26,6 @@ using DaggerfallWorkshop.Game.Player;
 using DaggerfallWorkshop.Game.Guilds;
 using Wenzil.Console;
 using DaggerfallWorkshop.Game.Utility;
-using DaggerfallWorkshop.Game.Formulas;
 
 namespace DaggerfallWorkshop.Game
 {

@@ -9,7 +9,6 @@
 // Notes:
 //
 
-using System;
 using Unity.Jobs;
 
 namespace DaggerfallWorkshop

@@ -9,9 +9,7 @@
 // Notes:
 //
 
-using UnityEngine;
 using System;
-using System.Collections;
 using System.Text.RegularExpressions;
 using FullSerializer;
 

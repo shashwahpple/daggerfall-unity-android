@@ -25,8 +25,6 @@ using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.MagicAndEffects;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
-using UnityEngine.Localization.Settings;
-using static DaggerfallWorkshop.Game.UserInterface.BaseScreenComponent;
 
 namespace DaggerfallWorkshop.Game
 {

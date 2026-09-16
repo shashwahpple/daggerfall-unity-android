@@ -16,7 +16,6 @@ using DaggerfallWorkshop.Game.Player;
 using UnityEngine;
 using DaggerfallWorkshop.Game.Serialization;
 using DaggerfallWorkshop.Game.Formulas;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 
 namespace DaggerfallWorkshop.Game.Guilds
 {

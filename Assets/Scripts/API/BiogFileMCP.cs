@@ -10,7 +10,6 @@
 //
 
 using DaggerfallWorkshop.Utility;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;

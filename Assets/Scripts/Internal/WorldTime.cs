@@ -10,8 +10,6 @@
 //
 
 using UnityEngine;
-using System.Collections;
-using System;
 using DaggerfallWorkshop.Utility;
 
 namespace DaggerfallWorkshop

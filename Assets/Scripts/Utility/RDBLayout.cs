@@ -10,16 +10,12 @@
 //
 
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System;
-using System.IO;
 using DaggerfallConnect;
-using DaggerfallConnect.Utility;
 using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Serialization;
-using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Utility.AssetInjection;
 using DaggerfallWorkshop.Game.Questing;
 using DaggerfallWorkshop.Game.Items;

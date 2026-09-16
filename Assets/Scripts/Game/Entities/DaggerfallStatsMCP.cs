@@ -8,7 +8,6 @@
 using System;
 using DaggerfallConnect;
 using DaggerfallWorkshop.Utility;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 
 namespace DaggerfallWorkshop.Game.Entity
 {

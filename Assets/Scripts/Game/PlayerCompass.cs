@@ -11,12 +11,8 @@
 
 using UnityEngine;
 using System.IO;
-using System.Collections;
-using DaggerfallWorkshop;
-using DaggerfallWorkshop.Utility;
 using DaggerfallConnect;
 using DaggerfallConnect.Arena2;
-using DaggerfallConnect.Utility;
 
 namespace DaggerfallWorkshop.Game
 {

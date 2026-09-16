@@ -10,7 +10,6 @@
 //
 
 using UnityEngine;
-using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using System.Collections.Generic;
 using DaggerfallConnect;

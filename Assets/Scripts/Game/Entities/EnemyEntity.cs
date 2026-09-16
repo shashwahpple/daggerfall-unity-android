@@ -13,10 +13,8 @@ using UnityEngine;
 using DaggerfallConnect;
 using DaggerfallWorkshop.Game.Formulas;
 using DaggerfallConnect.Save;
-using DaggerfallConnect.FallExe;
 using DaggerfallWorkshop.Game.MagicAndEffects;
 using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
-using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Items;
 
 namespace DaggerfallWorkshop.Game.Entity

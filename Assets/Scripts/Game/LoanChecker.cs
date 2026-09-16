@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game.Banking;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Utility;

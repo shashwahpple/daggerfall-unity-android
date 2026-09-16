@@ -9,7 +9,6 @@
 // Notes:
 //
 
-using System;
 using UnityEngine;
 
 public static class VersionInfo

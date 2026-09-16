@@ -1,6 +1,5 @@
 ﻿using System;
 using DaggerfallWorkshop.AudioSynthesis.Bank.Descriptors;
-using DaggerfallWorkshop.AudioSynthesis.Synthesis;
 
 namespace DaggerfallWorkshop.AudioSynthesis.Bank.Components.Generators
 {

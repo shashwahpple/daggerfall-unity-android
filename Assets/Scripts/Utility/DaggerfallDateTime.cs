@@ -11,7 +11,6 @@
 
 using UnityEngine;
 using System;
-using System.Collections;
 using DaggerfallWorkshop.Game;
 
 namespace DaggerfallWorkshop.Utility

@@ -7,3 +7,22 @@ end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
 
+[*.cs]
+# Analyzer/style rules picked up by Rider, Visual Studio, VSCode C# extension, and `dotnet format`
+# once Unity has generated .csproj/.sln files (Assets > Open C# Project).
+
+# Unused usings/members — common source of noise in a large, long-lived codebase
+dotnet_diagnostic.CS0168.severity = warning
+dotnet_diagnostic.CS0219.severity = warning
+dotnet_diagnostic.IDE0005.severity = warning
+
+# Naming: PascalCase for types/methods/properties, matching this codebase's existing convention
+dotnet_naming_rule.types_and_members_pascal_case.severity = suggestion
+dotnet_naming_rule.types_and_members_pascal_case.symbols = types_and_members
+dotnet_naming_rule.types_and_members_pascal_case.style = pascal_case_style
+dotnet_naming_symbols.types_and_members.applicable_kinds = class, struct, interface, enum, method, property, event
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+# Prefer explicit access modifiers
+dotnet_style_require_accessibility_modifiers = always:suggestion
+

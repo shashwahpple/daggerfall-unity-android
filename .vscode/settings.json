@@ -136,7 +136,7 @@
         ]
     },
     "csharp.semanticHighlighting.enabled": true,
-    "dotnet.defaultSolution": "dagerfall-unity.sln",
+    "dotnet.defaultSolution": "daggerfall-unity-android.slnx",
     "dotnet.server.useOmnisharp": true,
     "dotnet.preferCSharpExtension": true
 }

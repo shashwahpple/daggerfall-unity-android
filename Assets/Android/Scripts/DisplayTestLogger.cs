@@ -33,16 +33,18 @@ namespace DaggerfallWorkshop
 
         void Update()
         {
-            // Ground-truth touch logging independent of the UI event system: Touch.displayIndex reports
-            // which physical display a touch actually originated on, so it can be compared against
-            // whichever button's DisplayTestTapButton fired (or whether none did) to catch misrouting.
+            // Raw touch logging independent of the UI event system, to compare against whichever
+            // button's DisplayTestTapButton fired (or whether none did). Legacy UnityEngine.Touch has
+            // no display attribution of its own (that only exists via the Input System package's
+            // pointer devices), so this can't say which physical display a touch came from on its
+            // own - correlate it against which screen you physically tapped instead.
             for (int i = 0; i < Input.touchCount; i++)
             {
                 Touch touch = Input.GetTouch(i);
                 if (touch.phase == TouchPhase.Began)
                 {
-                    Debug.LogFormat("[DisplayTest] RAW TOUCH began fingerId={0} pos={1} touch.displayIndex={2}",
-                        touch.fingerId, touch.position, touch.displayIndex);
+                    Debug.LogFormat("[DisplayTest] RAW TOUCH began fingerId={0} pos={1}",
+                        touch.fingerId, touch.position);
                 }
             }
 

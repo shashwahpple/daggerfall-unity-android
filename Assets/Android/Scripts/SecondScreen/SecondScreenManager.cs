@@ -60,8 +60,24 @@ namespace DaggerfallWorkshop
 
             Camera secondScreenCamera = CreateSecondScreenCamera();
             CreatePanel<InteractModeStripPanel>(secondScreenCamera, "InteractModeStripPanel");
-            CreatePanel<PaperDollPanel>(secondScreenCamera, "PaperDollPanel");
-            CreatePanel<EquipmentPanel>(secondScreenCamera, "EquipmentPanel");
+
+            PaperDollPanel doll = CreatePanel<PaperDollPanel>(secondScreenCamera, "PaperDollPanel");
+            EquipmentPanel equipment = CreatePanel<EquipmentPanel>(secondScreenCamera, "EquipmentPanel");
+
+            SpellListPanel spellList = CreatePanel<SpellListPanel>(secondScreenCamera, "SpellListPanel");
+
+            // Placeholder until Map's real content panel exists - that's a separate deferred phase.
+            PlaceholderContentPanel mapPage = CreatePanel<PlaceholderContentPanel>(secondScreenCamera, "MapPage");
+            mapPage.Message = "Map (coming soon)";
+
+            // Created last so its tabs can reference every page's GameObject above, but still before
+            // SecondScreenTouchDispatcher's one-time GraphicRaycaster scan below, which needs every
+            // page's raycaster present (even ones this hides immediately) since it never rescans.
+            ContentTabStripPanel tabStrip = CreatePanel<ContentTabStripPanel>(secondScreenCamera, "ContentTabStripPanel");
+            tabStrip.AddTab("Inventory", doll.gameObject, equipment.gameObject);
+            tabStrip.AddTab("Map", mapPage.gameObject);
+            tabStrip.AddTab("Spell List", spellList.gameObject);
+            tabStrip.BuildAndShowFirstTab();
 
             // Confirmed on-device: the AYN Thor exposes each screen as a separate Touchscreen device with
             // correct per-touch displayIndex, so route Display 2 taps by reading that directly instead of

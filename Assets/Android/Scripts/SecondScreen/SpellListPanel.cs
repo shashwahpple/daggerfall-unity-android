@@ -4,21 +4,26 @@ using UnityEngine.UI;
 using TMPro;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;
-using DaggerfallWorkshop.Game.Items;
+using DaggerfallWorkshop.Game.Formulas;
+using DaggerfallWorkshop.Game.MagicAndEffects;
 
 namespace DaggerfallWorkshop
 {
     /// <summary>
-    /// Persistent Display 2 scrollable list of the player's equippable inventory, tap to equip/unequip.
-    /// Sits to the right of PaperDollPanel, which shows the equipped result visually and offers a second,
-    /// faster way to unequip (tap the doll). Equip/unequip logic lives in EquipmentActions, shared by both
-    /// panels so they can never disagree about what's equippable or leave armor values out of sync in a
-    /// way the main inventory window wouldn't allow.
+    /// Persistent Display 2 scrollable list of the player's known spells, tap to ready one. Structurally
+    /// mirrors EquipmentPanel, but needs none of that panel's EquipmentActions-style extraction: unlike
+    /// DaggerfallInventoryWindow's EquipItem/UnequipItem (protected instance methods, forcing a
+    /// reimplementation), EntityEffectManager.SetReadySpell(EntityEffectBundle, bool) is already public on
+    /// GameManager.Instance.PlayerEffectManager - a single shared per-player instance, not per-window
+    /// state - so this panel calls the exact same method DaggerfallSpellBookWindow's own spell selection
+    /// does. That also means this panel, DaggerfallSpellBookWindow, and the gamepad's Recast Spell action
+    /// (which reads EntityEffectManager.LastSpell) all read/write the same shared ready-spell state and
+    /// can't drift out of sync with each other.
     /// </summary>
-    public class EquipmentPanel : MonoBehaviour
+    public class SpellListPanel : MonoBehaviour
     {
-        static readonly Color EquippedColor = new Color(0.2f, 0.45f, 0.2f, 0.9f);
-        static readonly Color UnequippedColor = new Color(0.2f, 0.2f, 0.2f, 0.9f);
+        static readonly Color ReadyColor = new Color(0.2f, 0.45f, 0.2f, 0.9f);
+        static readonly Color IdleColor = new Color(0.2f, 0.2f, 0.2f, 0.9f);
 
         const float RefreshInterval = 1f;
 
@@ -33,10 +38,9 @@ namespace DaggerfallWorkshop
 
         void Update()
         {
-            // PlayerEntity may not exist yet the moment this panel is created (the game scene loads
-            // before character creation finishes), and inventory can also change from the main
-            // DaggerfallInventoryWindow while this panel is visible - poll periodically rather than
-            // refreshing once, so the list actually populates and stays in sync.
+            // Spell list can change from the main DaggerfallSpellBookWindow (buy/rename/reorder/delete)
+            // while this panel is visible, and readied spell can change from gameplay (cast, recast,
+            // abort) - poll periodically rather than refreshing once, so this stays in sync with both.
             refreshTimer += Time.deltaTime;
             if (refreshTimer >= RefreshInterval)
             {
@@ -53,9 +57,9 @@ namespace DaggerfallWorkshop
             GameObject rootGO = new GameObject("Root");
             rootGO.transform.SetParent(transform, false);
             RectTransform panelRect = rootGO.AddComponent<RectTransform>();
-            // Left of this width is reserved for PaperDollPanel; the vertical space above this is
-            // reserved for ContentTabStripPanel and InteractModeStripPanel - see SecondScreenManager.
-            panelRect.anchorMin = new Vector2(0.35f, 0f);
+            // Vertical space above this is reserved for ContentTabStripPanel and InteractModeStripPanel -
+            // see SecondScreenManager.
+            panelRect.anchorMin = Vector2.zero;
             panelRect.anchorMax = new Vector2(1f, 0.80f);
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
@@ -107,39 +111,46 @@ namespace DaggerfallWorkshop
             if (playerEntity == null)
                 return;
 
-            // Snapshot before iterating: EquipItem can call SplitStack, which mutates playerEntity.Items
-            // in place, so we never want to be iterating the live collection during a click callback.
-            List<DaggerfallUnityItem> snapshot = new List<DaggerfallUnityItem>();
-            for (int i = 0; i < playerEntity.Items.Count; i++)
-                snapshot.Add(playerEntity.Items.GetItem(i));
+            EffectBundleSettings[] spells = playerEntity.GetSpells();
+            if (spells == null)
+                return;
 
-            foreach (DaggerfallUnityItem item in snapshot)
-            {
-                if (playerEntity.ItemEquipTable.GetEquipSlot(item) == EquipSlots.None)
-                    continue; // Not an equippable item type (gold, potions, ingredients, etc.)
+            // Highlight whichever spell is readied, or - once it's actually been cast and readySpell
+            // clears - whichever was cast last, since that's what Recast Spell re-readies. Without the
+            // LastSpell fallback the highlight would disappear the instant a cast animation completes,
+            // even though that spell is still the one gameplay treats as "current" for recasting.
+            EntityEffectManager effectManager = GameManager.Instance.PlayerEffectManager;
+            EntityEffectBundle current = effectManager == null ? null
+                : effectManager.HasReadySpell ? effectManager.ReadySpell
+                : effectManager.LastSpell;
+            string currentName = current != null ? current.Settings.Name : null;
 
-                CreateRow(item, playerEntity.ItemEquipTable.IsEquipped(item));
-            }
+            foreach (EffectBundleSettings spell in spells)
+                CreateRow(spell, spell.Name == currentName);
         }
 
-        void CreateRow(DaggerfallUnityItem item, bool isEquipped)
+        void CreateRow(EffectBundleSettings spell, bool isCurrent)
         {
-            GameObject rowGO = new GameObject("Row_" + item.LongName);
+            (int _, int spellPointCost) = FormulaHelper.CalculateTotalEffectCosts(spell.Effects, spell.TargetType, null, spell.MinimumCastingCost);
+            if (spell.Tag == PlayerEntity.lycanthropySpellTag)
+                spellPointCost = 0; // Lycanthropy is a free spell, even though it shows a cost in classic
+
+            GameObject rowGO = new GameObject("Row_" + spell.Name);
             rowGO.transform.SetParent(content, false);
 
             LayoutElement layoutElement = rowGO.AddComponent<LayoutElement>();
             layoutElement.preferredHeight = 70f;
 
             Image rowImage = rowGO.AddComponent<Image>();
-            rowImage.color = isEquipped ? EquippedColor : UnequippedColor;
+            rowImage.color = isCurrent ? ReadyColor : IdleColor;
 
             Button button = rowGO.AddComponent<Button>();
-            button.onClick.AddListener(() => OnItemRowClicked(item));
+            button.onClick.AddListener(() => OnSpellRowClicked(spell));
 
             GameObject labelGO = new GameObject("Label");
             labelGO.transform.SetParent(rowGO.transform, false);
             TextMeshProUGUI label = labelGO.AddComponent<TextMeshProUGUI>();
-            label.text = isEquipped ? item.LongName + "  [Equipped]" : item.LongName;
+            label.text = isCurrent ? string.Format("{0} - {1}  [Current]", spell.Name, spellPointCost) : string.Format("{0} - {1}", spell.Name, spellPointCost);
             label.alignment = TextAlignmentOptions.MidlineLeft;
             label.fontSize = 28;
             label.color = Color.white;
@@ -154,21 +165,21 @@ namespace DaggerfallWorkshop
             labelRect.offsetMax = new Vector2(-30f, 0f);
         }
 
-        void OnItemRowClicked(DaggerfallUnityItem item)
+        void OnSpellRowClicked(EffectBundleSettings spell)
         {
             if (GameManager.IsGamePaused || DaggerfallUI.UIManager.WindowCount > 0)
                 return;
 
-            PlayerEntity playerEntity = GameManager.Instance.PlayerEntity;
-            if (playerEntity == null)
+            EntityEffectManager effectManager = GameManager.Instance.PlayerEffectManager;
+            if (effectManager == null)
                 return;
 
             DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
 
-            if (playerEntity.ItemEquipTable.IsEquipped(item))
-                EquipmentActions.UnequipItem(playerEntity, item);
-            else
-                EquipmentActions.EquipItem(playerEntity, item);
+            // Faithful copy of DaggerfallSpellBookWindow.SpellsListBox_OnUseSelectedItem - lycanthropes
+            // cast for free, matching classic.
+            bool noSpellPointCost = spell.Tag == PlayerEntity.lycanthropySpellTag;
+            effectManager.SetReadySpell(new EntityEffectBundle(spell, GameManager.Instance.PlayerEntityBehaviour), noSpellPointCost);
 
             Refresh();
         }

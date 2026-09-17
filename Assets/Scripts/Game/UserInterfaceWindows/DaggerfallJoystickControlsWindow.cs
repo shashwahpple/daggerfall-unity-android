@@ -560,12 +560,23 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
             AynThorGamepadPreset.Apply();
 
-            // Preset applies directly to live InputManager/settings state; resync this window's staged
-            // values and visible controls so they don't get stale-overwritten if the player later presses
-            // Continue, and so the change is reflected on screen immediately.
+            // Preset applies directly to live InputManager/settings state; resync this window's own
+            // staged values and visible controls so they don't get stale-overwritten if the player later
+            // presses Continue, and so the change is reflected on screen immediately.
             ResetUnsavedSettings();
             UpdateControlsToUnsavedSettings();
             CheckDuplicates();
+
+            // Also resync ControlsConfigManager's staged keybinds (InputManager.Actions - Jump,
+            // ActivateCenterObject, RecastSpell, etc.) - this is a *different* staging dictionary owned by
+            // the parent DaggerfallControlsWindow (the keyboard controls menu this window is opened from),
+            // captured when that window was entered. Without this, closing back out through that parent
+            // window calls its own OnPop() -> ControlsConfigManager.SetAllKeyBindValues(), which writes its
+            // stale pre-preset snapshot back over every Action binding, silently reverting this preset's
+            // face-button/trigger/bumper rebinds to their keyboard defaults (confirmed on-device via
+            // logcat, 2026-09-17: preset applied correctly, then reverted ~3s later when the parent Controls
+            // window closed).
+            ControlsConfigManager.Instance.ResetUnsavedKeybinds();
         }
 #endif
 

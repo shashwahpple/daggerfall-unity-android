@@ -71,9 +71,10 @@ namespace DaggerfallWorkshop
             GameObject rootGO = new GameObject("Root");
             rootGO.transform.SetParent(transform, false);
             RectTransform panelRect = rootGO.AddComponent<RectTransform>();
-            // Right of this width is reserved for EquipmentPanel's item list - see SecondScreenManager.
+            // Right of this width is reserved for EquipmentPanel's item list; the vertical space above
+            // this is reserved for ContentTabStripPanel and InteractModeStripPanel - see SecondScreenManager.
             panelRect.anchorMin = new Vector2(0f, 0f);
-            panelRect.anchorMax = new Vector2(0.35f, 0.88f);
+            panelRect.anchorMax = new Vector2(0.35f, 0.80f);
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
 

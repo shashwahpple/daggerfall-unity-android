@@ -22,6 +22,10 @@ namespace DaggerfallWorkshop
     ///
     /// Notably absent: DFU has no Block/parry action or mechanic at all (classic Daggerfall combat has no
     /// active player-triggered block), so the Left Trigger is intentionally left unbound here.
+    ///
+    /// A=Jump, B=Interact/Activate (swapped from the initial preset per user preference, 2026-09-17) -
+    /// note menu-navigation JoystickUIActions below are unaffected by this swap and keep the standard
+    /// A=confirm/B=cancel convention regardless of what A/B do in gameplay.
     /// </summary>
     public static class AynThorGamepadPreset
     {
@@ -49,10 +53,14 @@ namespace DaggerfallWorkshop
             input.SetAxisActionInversion(InputManager.AxisActions.CameraVertical, true);
 
             // Face buttons
-            input.SetBinding(KeyCode.JoystickButton1, InputManager.Actions.ActivateCenterObject, primary: true); // A
-            input.SetBinding(KeyCode.JoystickButton0, InputManager.Actions.Jump, primary: true);                 // B
+            input.SetBinding(KeyCode.JoystickButton1, InputManager.Actions.Jump, primary: true);                 // A
+            input.SetBinding(KeyCode.JoystickButton0, InputManager.Actions.ActivateCenterObject, primary: true); // B
             input.SetBinding(KeyCode.JoystickButton3, InputManager.Actions.ReadyWeapon, primary: true);          // X
-            input.SetBinding(KeyCode.JoystickButton2, InputManager.Actions.CastSpell, primary: true);            // Y
+            // RecastSpell re-readies whatever spell EntityEffectManager.lastSpell holds (the spell most
+            // recently cast, tracked automatically by CastReadySpell), independent of the spellbook window -
+            // distinct from CastSpell (Actions.CastSpell), which only opens the spellbook to pick a fresh
+            // spell to ready. Bound here so Y can instantly recast without leaving gameplay to the spellbook.
+            input.SetBinding(KeyCode.JoystickButton2, InputManager.Actions.RecastSpell, primary: true);          // Y
 
             // Triggers/bumpers. Left Trigger (JoystickButton6) is intentionally left unbound - no Block
             // mechanic exists to bind it to.

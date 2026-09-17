@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
@@ -24,14 +25,14 @@ namespace DaggerfallWorkshop
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-            // A single EventSystem with the default StandaloneInputModule is Unity's normal setup even
-            // for multi-display projects — GraphicRaycaster filters hits per-canvas by comparing the
-            // canvas's targetDisplay against the pointer event's displayIndex, so one EventSystem should
-            // route to both canvases correctly in principle. Whether that holds up for touch specifically
-            // on this device is exactly what this scene's tap buttons + logging are here to confirm.
+            // GraphicRaycaster filters hits per-canvas by comparing the canvas's targetDisplay against
+            // the pointer event's displayIndex, so a single EventSystem is the correct setup in
+            // principle. But the legacy StandaloneInputModule never populates PointerEventData.displayIndex
+            // for touch input (confirmed on-device: Display 2 taps were misrouted to Display 1's canvas),
+            // so this uses InputSystemUIInputModule instead, which resolves the correct display per touch.
             GameObject eventSystemGO = new GameObject("EventSystem");
             eventSystemGO.AddComponent<EventSystem>();
-            eventSystemGO.AddComponent<StandaloneInputModule>();
+            eventSystemGO.AddComponent<InputSystemUIInputModule>();
 
             BuildDisplay(targetDisplay: 0, label: "Display1", bgColor: Color.blue, tapColor: Color.green, text: "DISPLAY 1");
             BuildDisplay(targetDisplay: 1, label: "Display2", bgColor: Color.red, tapColor: new Color(1f, 0.55f, 0f), text: "DISPLAY 2 TEST");

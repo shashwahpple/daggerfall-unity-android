@@ -2,28 +2,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using DaggerfallConnect.Arena2;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Items;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
 
 namespace DaggerfallWorkshop
 {
     /// <summary>
     /// Persistent Display 2 scrollable list of the player's equippable inventory, tap to equip/unequip.
-    /// Equip/unequip logic is a faithful copy of DaggerfallInventoryWindow.EquipItem/UnequipItem
-    /// (Assets/Scripts/Game/UserInterfaceWindows/DaggerfallInventoryWindow.cs:1322-1403), which are
-    /// protected instance methods and can't be called directly - reproduced here so this panel can never
-    /// equip a broken or forbidden item, or leave armor values out of sync, in a way the main inventory
-    /// window wouldn't allow. Any message boxes this raises (broken item / forbidden equipment) are DFU's
-    /// own native window-stack windows, so they render on Display 1, not this panel's screen.
+    /// Sits to the right of PaperDollPanel, which shows the equipped result visually and offers a second,
+    /// faster way to unequip (tap the doll). Equip/unequip logic lives in EquipmentActions, shared by both
+    /// panels so they can never disagree about what's equippable or leave armor values out of sync in a
+    /// way the main inventory window wouldn't allow.
     /// </summary>
     public class EquipmentPanel : MonoBehaviour
     {
-        const int ItemBrokenTextId = 29;
-        const int ForbiddenEquipmentTextId = 1068;
-
         static readonly Color EquippedColor = new Color(0.2f, 0.45f, 0.2f, 0.9f);
         static readonly Color UnequippedColor = new Color(0.2f, 0.2f, 0.2f, 0.9f);
 
@@ -60,7 +53,8 @@ namespace DaggerfallWorkshop
             GameObject rootGO = new GameObject("Root");
             rootGO.transform.SetParent(transform, false);
             RectTransform panelRect = rootGO.AddComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0f, 0f);
+            // Left of this width is reserved for PaperDollPanel - see SecondScreenManager.
+            panelRect.anchorMin = new Vector2(0.35f, 0f);
             panelRect.anchorMax = new Vector2(1f, 0.88f);
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
@@ -167,85 +161,11 @@ namespace DaggerfallWorkshop
             DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
 
             if (playerEntity.ItemEquipTable.IsEquipped(item))
-                UnequipItem(playerEntity, item);
+                EquipmentActions.UnequipItem(playerEntity, item);
             else
-                EquipItem(playerEntity, item);
+                EquipmentActions.EquipItem(playerEntity, item);
 
             Refresh();
-        }
-
-        // Faithful copy of DaggerfallInventoryWindow.EquipItem (lines 1322-1393), minus the call to that
-        // window's own Refresh() at the end - this panel calls its own Refresh() from OnItemRowClicked.
-        void EquipItem(PlayerEntity playerEntity, DaggerfallUnityItem item)
-        {
-            if (item.ItemGroup == ItemGroups.Weapons && item.TemplateIndex == (int)Weapons.Arrow)
-                return;
-
-            if (item.currentCondition < 1)
-            {
-                TextFile.Token[] tokens = DaggerfallUnity.Instance.TextProvider.GetRSCTokens(ItemBrokenTextId);
-                if (tokens != null && tokens.Length > 0)
-                {
-                    DaggerfallMessageBox messageBox = new DaggerfallMessageBox(DaggerfallUI.UIManager, null);
-                    messageBox.SetTextTokens(tokens, item);
-                    messageBox.ClickAnywhereToClose = true;
-                    messageBox.Show();
-                }
-                return;
-            }
-
-            bool prohibited = false;
-
-            if (item.ItemGroup == ItemGroups.Armor)
-            {
-                if (item.IsShield && ((1 << (item.TemplateIndex - (int)Armor.Buckler) & (int)playerEntity.Career.ForbiddenShields) != 0))
-                    prohibited = true;
-                else if (!item.IsShield && (1 << (item.NativeMaterialValue >> 8) & (int)playerEntity.Career.ForbiddenArmors) != 0)
-                    prohibited = true;
-                else if (((item.nativeMaterialValue >> 8) == 2)
-                    && (1 << (item.NativeMaterialValue & 0xFF) & (int)playerEntity.Career.ForbiddenMaterials) != 0)
-                    prohibited = true;
-            }
-            else if (item.ItemGroup == ItemGroups.Weapons)
-            {
-                if ((item.GetWeaponSkillUsed() & (int)playerEntity.Career.ForbiddenProficiencies) != 0)
-                    prohibited = true;
-                else if ((1 << item.NativeMaterialValue & (int)playerEntity.Career.ForbiddenMaterials) != 0)
-                    prohibited = true;
-            }
-
-            if (prohibited)
-            {
-                TextFile.Token[] tokens = DaggerfallUnity.Instance.TextProvider.GetRSCTokens(ForbiddenEquipmentTextId);
-                if (tokens != null && tokens.Length > 0)
-                {
-                    DaggerfallMessageBox messageBox = new DaggerfallMessageBox(DaggerfallUI.UIManager, null);
-                    messageBox.SetTextTokens(tokens);
-                    messageBox.ClickAnywhereToClose = true;
-                    messageBox.Show();
-                }
-                return;
-            }
-
-            List<DaggerfallUnityItem> unequippedList = playerEntity.ItemEquipTable.EquipItem(item);
-            if (unequippedList != null)
-            {
-                foreach (DaggerfallUnityItem unequippedItem in unequippedList)
-                    playerEntity.UpdateEquippedArmorValues(unequippedItem, false);
-                playerEntity.UpdateEquippedArmorValues(item, true);
-            }
-        }
-
-        // Faithful copy of DaggerfallInventoryWindow.UnequipItem (lines 1395-1403), minus refreshPaperDoll
-        // (this panel has no paper doll) and that window's own Refresh() call.
-        void UnequipItem(PlayerEntity playerEntity, DaggerfallUnityItem item)
-        {
-            if (playerEntity.ItemEquipTable.UnequipItem(item.EquipSlot) != null)
-                playerEntity.UpdateEquippedArmorValues(item, false);
-
-            // DontCare matches DaggerfallInventoryWindow's own default preferredOrder - this is a no-op
-            // unless the unequipped item can now merge into an existing stack elsewhere in inventory.
-            playerEntity.Items.ReorderItem(item, ItemCollection.AddPosition.DontCare);
         }
     }
 }

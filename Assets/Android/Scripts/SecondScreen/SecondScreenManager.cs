@@ -60,6 +60,7 @@ namespace DaggerfallWorkshop
 
             Camera secondScreenCamera = CreateSecondScreenCamera();
             CreatePanel<InteractModeStripPanel>(secondScreenCamera, "InteractModeStripPanel");
+            CreatePanel<PaperDollPanel>(secondScreenCamera, "PaperDollPanel");
             CreatePanel<EquipmentPanel>(secondScreenCamera, "EquipmentPanel");
 
             // Confirmed on-device: the AYN Thor exposes each screen as a separate Touchscreen device with

@@ -2,6 +2,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
@@ -23,8 +24,17 @@ namespace DaggerfallWorkshop
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-            BuildDisplay(targetDisplay: 0, label: "Display1", bgColor: Color.blue, text: "DISPLAY 1");
-            BuildDisplay(targetDisplay: 1, label: "Display2", bgColor: Color.red, text: "DISPLAY 2 TEST");
+            // A single EventSystem with the default StandaloneInputModule is Unity's normal setup even
+            // for multi-display projects — GraphicRaycaster filters hits per-canvas by comparing the
+            // canvas's targetDisplay against the pointer event's displayIndex, so one EventSystem should
+            // route to both canvases correctly in principle. Whether that holds up for touch specifically
+            // on this device is exactly what this scene's tap buttons + logging are here to confirm.
+            GameObject eventSystemGO = new GameObject("EventSystem");
+            eventSystemGO.AddComponent<EventSystem>();
+            eventSystemGO.AddComponent<StandaloneInputModule>();
+
+            BuildDisplay(targetDisplay: 0, label: "Display1", bgColor: Color.blue, tapColor: Color.green, text: "DISPLAY 1");
+            BuildDisplay(targetDisplay: 1, label: "Display2", bgColor: Color.red, tapColor: new Color(1f, 0.55f, 0f), text: "DISPLAY 2 TEST");
 
             new GameObject("DisplayTestLogger").AddComponent<DisplayTestLogger>();
 
@@ -36,7 +46,7 @@ namespace DaggerfallWorkshop
             Debug.LogFormat("[DisplayTest] Saved scene to {0}", ScenePath);
         }
 
-        static void BuildDisplay(int targetDisplay, string label, Color bgColor, string text)
+        static void BuildDisplay(int targetDisplay, string label, Color bgColor, Color tapColor, string text)
         {
             // Cameras/canvases for each display are spatially separated far apart so their
             // Screen Space - Camera UI content (placed in front of each camera automatically)
@@ -55,6 +65,8 @@ namespace DaggerfallWorkshop
             Canvas canvas = canvasGO.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceCamera;
             canvas.worldCamera = cam;
+            // Required for any UI element on this canvas to receive pointer/touch events at all.
+            canvasGO.AddComponent<GraphicRaycaster>();
 
             GameObject imgGO = new GameObject("BackgroundImage");
             imgGO.transform.SetParent(canvasGO.transform, false);
@@ -69,7 +81,55 @@ namespace DaggerfallWorkshop
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontSize = 72;
             tmp.color = Color.white;
-            StretchFull(tmp.rectTransform);
+            RectTransform tmpRect = tmp.rectTransform;
+            tmpRect.anchorMin = new Vector2(0f, 0.78f);
+            tmpRect.anchorMax = new Vector2(1f, 1f);
+            tmpRect.offsetMin = Vector2.zero;
+            tmpRect.offsetMax = Vector2.zero;
+
+            BuildTapButton(canvasGO.transform, targetDisplay, Color.white, tapColor);
+        }
+
+        static void BuildTapButton(Transform canvasTransform, int targetDisplay, Color idleColor, Color tapColor)
+        {
+            GameObject buttonGO = new GameObject("TapButton");
+            buttonGO.transform.SetParent(canvasTransform, false);
+            Image btnImg = buttonGO.AddComponent<Image>();
+            btnImg.color = idleColor;
+            RectTransform btnRect = btnImg.rectTransform;
+            btnRect.anchorMin = new Vector2(0.3f, 0.4f);
+            btnRect.anchorMax = new Vector2(0.7f, 0.62f);
+            btnRect.offsetMin = Vector2.zero;
+            btnRect.offsetMax = Vector2.zero;
+
+            GameObject btnLabelGO = new GameObject("TapButtonLabel");
+            btnLabelGO.transform.SetParent(buttonGO.transform, false);
+            TextMeshProUGUI btnLabelTmp = btnLabelGO.AddComponent<TextMeshProUGUI>();
+            btnLabelTmp.text = "TAP";
+            btnLabelTmp.alignment = TextAlignmentOptions.Center;
+            btnLabelTmp.fontSize = 48;
+            btnLabelTmp.color = Color.black;
+            StretchFull(btnLabelTmp.rectTransform);
+
+            GameObject counterGO = new GameObject("Counter");
+            counterGO.transform.SetParent(canvasTransform, false);
+            TextMeshProUGUI counterTmp = counterGO.AddComponent<TextMeshProUGUI>();
+            counterTmp.text = "Taps: 0";
+            counterTmp.alignment = TextAlignmentOptions.Center;
+            counterTmp.fontSize = 48;
+            counterTmp.color = Color.white;
+            RectTransform counterRect = counterTmp.rectTransform;
+            counterRect.anchorMin = new Vector2(0f, 0.2f);
+            counterRect.anchorMax = new Vector2(1f, 0.35f);
+            counterRect.offsetMin = Vector2.zero;
+            counterRect.offsetMax = Vector2.zero;
+
+            DisplayTestTapButton tapHandler = buttonGO.AddComponent<DisplayTestTapButton>();
+            tapHandler.ExpectedDisplayIndex = targetDisplay;
+            tapHandler.TargetImage = btnImg;
+            tapHandler.CounterText = counterTmp;
+            tapHandler.IdleColor = idleColor;
+            tapHandler.TapColor = tapColor;
         }
 
         static void StretchFull(RectTransform rect)

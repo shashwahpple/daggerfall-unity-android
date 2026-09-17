@@ -31,6 +31,25 @@ namespace DaggerfallWorkshop
             LogDisplays("post-activation");
         }
 
+        void Update()
+        {
+            // Ground-truth touch logging independent of the UI event system: Touch.displayIndex reports
+            // which physical display a touch actually originated on, so it can be compared against
+            // whichever button's DisplayTestTapButton fired (or whether none did) to catch misrouting.
+            for (int i = 0; i < Input.touchCount; i++)
+            {
+                Touch touch = Input.GetTouch(i);
+                if (touch.phase == TouchPhase.Began)
+                {
+                    Debug.LogFormat("[DisplayTest] RAW TOUCH began fingerId={0} pos={1} touch.displayIndex={2}",
+                        touch.fingerId, touch.position, touch.displayIndex);
+                }
+            }
+
+            if (Input.GetMouseButtonDown(0))
+                Debug.LogFormat("[DisplayTest] RAW MOUSE click pos={0}", Input.mousePosition);
+        }
+
         void LogDisplays(string label)
         {
             Debug.LogFormat("[DisplayTest] ({0}) Display.displays.Length = {1}", label, Display.displays.Length);

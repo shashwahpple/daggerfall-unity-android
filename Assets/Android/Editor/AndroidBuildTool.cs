@@ -1,6 +1,8 @@
 
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.AddressableAssets.Build;
 using System.Collections.Generic;
 using System.IO;
 
@@ -98,6 +100,9 @@ public class AndroidBuildTool : EditorWindow
 
     private void BuildAll()
     {
+        if (!BuildAddressablesContent())
+            return;
+
         for (int i = 0; i < buildConfigs.Count; i++)
         {
             BuildConfig config = buildConfigs[i];
@@ -106,6 +111,28 @@ public class AndroidBuildTool : EditorWindow
 
             BuildAndroid(config, i + 1);
         }
+    }
+
+    // Addressables content (built to Library/com.unity.addressables/aa/Android, then injected straight
+    // into the APK by Unity's own AddressablesPlayerBuildProcessor during BuildPipeline.BuildPlayer) is
+    // platform-wide, not per-build-config, and won't exist yet on a fresh checkout - it's a build artifact,
+    // not checked into git. Without it, Localization and any other Addressables-backed lookups fail at
+    // runtime with "SelectedLocale is null" / RuntimeData-is-null errors, since the player can't find its
+    // catalog. Building it once here, before any player build, keeps that from going stale silently.
+    private bool BuildAddressablesContent()
+    {
+        // Addressables content is built for whichever build target is currently active, so this has to
+        // happen after switching to Android, not before - otherwise it would build content for whatever
+        // platform the Editor happened to be set to (e.g. Windows) instead.
+        EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+
+        AddressableAssetSettings.BuildPlayerContent(out AddressablesPlayerBuildResult result);
+        if (!string.IsNullOrEmpty(result.Error))
+        {
+            Debug.LogError("Addressables content build failed, aborting player build: " + result.Error);
+            return false;
+        }
+        return true;
     }
 
     private void BuildAndroid(BuildConfig config, int buildNumber)

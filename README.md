@@ -2,11 +2,25 @@
 
 # Unofficial Android Port of Daggerfall Unity
 
-This is an Android port of the original DFU project found at https://github.com/Interkarma/daggerfall-unity
+This is an Android port of the original DFU project found at https://github.com/Interkarma/daggerfall-unity, itself built on top of the general-purpose Android port at [Vwing/daggerfall-unity-android](https://github.com/Vwing/daggerfall-unity-android).
 
-Please visit the [releases page](https://github.com/Vwing/daggerfall-unity-android/releases) if you're looking for the APK or instructions on setting it up. If you have any questions or feedback, or if you want access to the bleeding-edge pre-release builds, please join the [#dfu-android](https://discord.com/channels/559842137374457876/1248079754641277059) channel of Lysandus' Tomb Discord ([invite link](https://discord.gg/rn95kxPGpg)).
+Please visit [Vwing's releases page](https://github.com/Vwing/daggerfall-unity-android/releases) if you're looking for a general-purpose Android APK or setup instructions. If you have any questions or feedback, or if you want access to the bleeding-edge pre-release builds, please join the [#dfu-android](https://discord.com/channels/559842137374457876/1248079754641277059) channel of Lysandus' Tomb Discord ([invite link](https://discord.gg/rn95kxPGpg)).
 
-Any feature requests or bugs related to Android should be opened as an [issue](https://github.com/Vwing/daggerfall-unity-android/issues) on this fork, and *not* on the main project. Alternatively, you may open a post on the Discord in the [#android-feedback](https://discord.com/channels/559842137374457876/1257519041103396924) channel.
+Feature requests or bugs related to the general Android port should be opened as an issue on [Vwing's fork](https://github.com/Vwing/daggerfall-unity-android/issues), *not* here or on the main project. Issues specific to this fork's dual-screen/gamepad handheld work belong on [this fork's issue tracker](https://github.com/shashwahpple/daggerfall-unity-android/issues) instead. Alternatively, you may open a post on the Discord in the [#android-feedback](https://discord.com/channels/559842137374457876/1257519041103396924) channel.
+
+## Goal of This Fork
+
+Vwing's port targets Android in general (phones and tablets); this fork specializes it for **Android dual-screen/gamepad handhelds**, such as the [AYN Thor](https://www.ayntec.com/), which pair a second physical display with built-in controller buttons and sticks. The goal is to make Daggerfall Unity feel native to that form factor, rather than a phone port with a virtual joystick overlay. Work so far includes:
+
+- **Second-screen UI** — a persistent panel set on the device's second display, independent of the main 3D view: an interaction-mode switcher, a tap-to-equip inventory list, and a visual Paper Doll (equipped-gear character view, tap an item to unequip it).
+- **Physical gamepad support** — an opt-in default control scheme mapped to the AYN Thor's face buttons, bumpers/triggers, and sticks, built on top of Daggerfall Unity's existing (keyboard/mouse-oriented) input binding system.
+- **Android build fixes** — e.g. ensuring Addressables content is actually built into APKs produced by the Multi-Build Tool.
+
+There's no published release yet for this fork specifically - build it yourself via **Daggerfall Tools → Android → Multi-Build Tool** in the Unity Editor and install the resulting APK on your device.
+
+## AI Assistance Disclaimer
+
+I'm a software developer by trade, but my specialization is business and software integration - not Android platform engineering, Unity internals, or game input architecture. The Android-specific work in this fork (second-screen UI, gamepad input mapping, build pipeline fixes) was developed with substantial assistance from Claude Code (Anthropic's AI coding assistant), including investigating Daggerfall Unity's existing systems, implementing changes, and on-device debugging. I've reviewed and tested everything on my own hardware, but wanted to be upfront about the extent of AI involvement given this is outside my usual area of expertise.
 
 # What is Daggerfall Unity?
 

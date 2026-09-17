@@ -50,6 +50,9 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         protected Button lookHorizontalAxisKeybindButton = new Button();
         protected Button lookVerticalAxisKeybindButton = new Button();
         protected Button continueButton = new Button();
+#if UNITY_ANDROID
+        protected Button aynThorPresetButton = new Button();
+#endif
 
         protected HorizontalSlider joystickCameraSensitivitySlider = new HorizontalSlider();
         protected HorizontalSlider joystickUIMouseSensitivitySlider = new HorizontalSlider();
@@ -146,6 +149,18 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 #if UNITY_ANDROID
             enableOnScreenControlsCheckbox = AddOption(80, 20, GetText("enableOnScreenControls"), TouchscreenInputManager.IsTouchscreenInputEnabled);
             enableOnScreenControlsCheckbox.OnToggleState += EnableOnScreenControlsCheckbox_OnToggleState;
+
+            // AYN Thor gamepad preset - binds physical gamepad buttons to gameplay Actions, scoped to
+            // this device rather than InputManager's global cross-device defaults. See
+            // AynThorGamepadPreset.cs for why this replaces rather than supplements the keyboard
+            // equivalent for each rebound action.
+            aynThorPresetButton.Label.Text = "AYN Thor Defaults";
+            aynThorPresetButton.Size = new Vector2(90, 10);
+            aynThorPresetButton.HorizontalAlignment = HorizontalAlignment.Left;
+            aynThorPresetButton.VerticalAlignment = VerticalAlignment.Bottom;
+            SetBackground(aynThorPresetButton, keybindButtonBackgroundColor, "joystickControlsAynThorPresetButtonBackgroundColor");
+            mainPanel.Components.Add(aynThorPresetButton);
+            aynThorPresetButton.OnMouseClick += AynThorPresetButton_OnMouseClick;
 #endif
 
             // keybind buttons
@@ -537,6 +552,20 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         {
             // Immediately toggle controller
             TouchscreenInputManager.IsTouchscreenInputEnabled = enableOnScreenControlsCheckbox.IsChecked;
+        }
+
+        private void AynThorPresetButton_OnMouseClick(BaseScreenComponent sender, Vector2 position)
+        {
+            DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
+
+            AynThorGamepadPreset.Apply();
+
+            // Preset applies directly to live InputManager/settings state; resync this window's staged
+            // values and visible controls so they don't get stale-overwritten if the player later presses
+            // Continue, and so the change is reflected on screen immediately.
+            ResetUnsavedSettings();
+            UpdateControlsToUnsavedSettings();
+            CheckDuplicates();
         }
 #endif
 

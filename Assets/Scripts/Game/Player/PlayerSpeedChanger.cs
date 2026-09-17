@@ -76,9 +76,19 @@ namespace DaggerfallWorkshop.Game
                 runningMode ^= InputManager.Instance.ActionStarted(InputManager.Actions.Run);
 
             if (!DaggerfallUnity.Settings.ToggleSneak)
+            {
                 sneakingMode = InputManager.Instance.HasAction(InputManager.Actions.Sneak);
+            }
             else
+            {
                 sneakingMode ^= InputManager.Instance.ActionStarted(InputManager.Actions.Sneak);
+
+                // Crouching also toggles sneaking in this mode, so a single button (e.g. a gamepad bumper
+                // bound to Crouch) can drive both together - Crouch is itself already toggle-based (see
+                // PlayerHeightChanger.DecideHeightAction). Only applies in toggle-sneak mode so classic
+                // hold-to-sneak keyboard play is unaffected.
+                sneakingMode ^= InputManager.Instance.ActionStarted(InputManager.Actions.Crouch);
+            }
 
             // If we enabled autorunning, and we are currently not running, run.
             // This allows a player already running to keep running instead of

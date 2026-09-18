@@ -21,5 +21,12 @@
             <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
             <meta-data android:name="notch_support" android:value="true" />
         </activity>
+
+        <activity
+            android:name="com.dfworkshop.daggerfallunityandroid.SecondScreenOwnerActivity"
+            android:exported="false"
+            android:resizeableActivity="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
     </application>
 </manifest>

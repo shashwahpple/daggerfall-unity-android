@@ -49,6 +49,10 @@ namespace DaggerfallWorkshop
                 return;
 
             new GameObject("SecondScreenManager").AddComponent<SecondScreenManager>();
+
+            // Claims Display 2 in Android's window model so tapping it doesn't hand controller
+            // focus to Android's SECONDARY_HOME resolution - see SecondScreenDisplayClaim.cs.
+            SecondScreenDisplayClaim.Claim();
         }
     }
 

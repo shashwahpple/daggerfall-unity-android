@@ -33,6 +33,16 @@ namespace DaggerfallWorkshop
         int selectedIndex = -1;
 
         /// <summary>
+        /// Vertical band this strip occupies, as anchors relative to whatever RectTransform it's attached
+        /// to. Defaults match the outer strip's placement in SecondScreenManager (leaving 0.88-1.0 above
+        /// for InteractModeStripPanel). Set before BuildAndShowFirstTab() to nest a second instance
+        /// flush against a different edge - see CharacterPanel, which has no InteractModeStripPanel
+        /// equivalent above it and would otherwise leave that space empty.
+        /// </summary>
+        public float AnchorMinY = 0.80f;
+        public float AnchorMaxY = 0.88f;
+
+        /// <summary>
         /// Registers a tab. pageRoots are the top-level GameObject(s) shown while this tab is selected and
         /// hidden otherwise - Inventory needs two (PaperDollPanel + EquipmentPanel), most tabs need one.
         /// Call before BuildAndShowFirstTab().
@@ -60,8 +70,8 @@ namespace DaggerfallWorkshop
             GameObject rootGO = new GameObject("Root");
             rootGO.transform.SetParent(transform, false);
             RectTransform panelRect = rootGO.AddComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0f, 0.80f);
-            panelRect.anchorMax = new Vector2(1f, 0.88f);
+            panelRect.anchorMin = new Vector2(0f, AnchorMinY);
+            panelRect.anchorMax = new Vector2(1f, AnchorMaxY);
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
 

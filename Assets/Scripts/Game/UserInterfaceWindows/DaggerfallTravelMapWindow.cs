@@ -132,7 +132,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         protected Color32[] locationPixelColors;              // Pixel colors for different location types
         protected Color identifyFlashColor;
 
-        protected int zoomfactor                  = 2;
         protected int mouseOverRegion             = -1;
         protected int selectedRegion              = -1;
         protected int mapIndex                    = 0;        // Current index of loaded map from selectedRegionMapNames
@@ -140,11 +139,25 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         protected float identifyLastChangeTime    = 0;
         protected float identifyChanges           = 0;
 
+        // Continuous zoom level (1 = not zoomed). Was a desktop-only binary toggle at a fixed 2x; now a
+        // free-ranging value so touch pinch-zoom (see HandleTouchZoomPan) can land anywhere in between.
+        protected const float minZoomLevel        = 1f;
+        protected const float maxZoomLevel         = 6f;
+        protected const float pinchZoomSpeed       = 0.015f;   // Zoom level change per pixel of pinch-distance change
+        protected const float touchPanSpeed        = 0.525f;   // Fraction of raw finger movement applied when panning while zoomed
+        protected const float mouseScrollZoomSpeed = 0.5f;     // Zoom level change per notch of mouse scroll wheel
+        protected const float tapMoveThreshold     = 20f;      // Raw screen pixels of single-finger movement before a touch counts as a pan, not a tap
+        protected float zoomLevel                  = minZoomLevel;
+        protected float lastPinchDistance;
+        protected Vector2 lastPinchMidpointPanel;
+        protected float touchPanDistance;
+        protected Vector2 lastPanTouchPos;
+        protected bool suppressNextClick;          // Set once a touch gesture has panned/pinched, so its eventual release doesn't also select a location
+
         protected bool identifyState          = false;
         protected bool identifying            = false;
         protected bool locationSelected       = false;
         protected bool findingLocation        = false;
-        protected bool zoom                   = false;        // Toggles zoom mode
         protected bool teleportationTravel    = false;        // Indicates travel should be by teleportation
         protected static bool revealUndiscoveredLocations;    // Flag used to indicate cheat/debugging mode for revealing undiscovered locations
 
@@ -389,6 +402,42 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             HotkeySequence.KeyModifiers keyModifiers = HotkeySequence.GetKeyboardKeyModifiers();
             Vector2 currentMousePos = new Vector2((NativePanel.ScaledMousePosition.x), (NativePanel.ScaledMousePosition.y));
 
+            // Zoom/pan first, so it takes effect before this frame's mouse-over/hit-test below rather
+            // than lagging a frame behind it.
+            if (RegionSelected)
+            {
+                if ((Application.isMobilePlatform || AndroidUtils.IsRunningInSimulator) && !Input.mousePresent)
+                {
+                    // Pinch to zoom, single-finger drag to pan while zoomed - see HandleTouchZoomPan.
+                    HandleTouchZoomPan(currentMousePos);
+                }
+                else
+                {
+                    if (InputManager.Instance.GetMouseButtonUp(1))
+                    {
+                        // Zoom to mouse position - convert using the zoom/crop still in effect from
+                        // before this toggle, since zoomPosition is content-space, not panel-space.
+                        zoomPosition = PanelToContent(currentMousePos);
+                        zoomLevel = (zoomLevel > minZoomLevel) ? minZoomLevel : 2f;
+                        ZoomMapTextures();
+                    }
+                    else if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && zoomLevel > minZoomLevel && NativePanel.MouseOverComponent)
+                    {
+                        // Scrolling while zoomed in
+                        zoomPosition = PanelToContent(currentMousePos);
+                        ZoomMapTextures();
+                    }
+
+                    // Mouse wheel also zooms continuously, the same way pinch does for touch.
+                    if (NativePanel.MouseOverComponent && Mathf.Abs(Input.mouseScrollDelta.y) > 0.01f)
+                    {
+                        zoomPosition = PanelToContent(currentMousePos);
+                        zoomLevel = Mathf.Clamp(zoomLevel + Input.mouseScrollDelta.y * mouseScrollZoomSpeed, minZoomLevel, maxZoomLevel);
+                        ZoomMapTextures();
+                    }
+                }
+            }
+
             if (currentMousePos != lastMousePos)
             {
                 lastMousePos = currentMousePos;
@@ -402,19 +451,6 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
             if (RegionSelected)
             {
-                if (InputManager.Instance.GetMouseButtonUp(1))
-                {
-                    // Zoom to mouse position
-                    zoomPosition = currentMousePos;
-                    zoom = !zoom;
-                    ZoomMapTextures();
-                }
-                else if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && zoom && NativePanel.MouseOverComponent)
-                {
-                    // Scrolling while zoomed in
-                    zoomPosition = currentMousePos;
-                    ZoomMapTextures();
-                }
                 if (DaggerfallShortcut.GetBinding(DaggerfallShortcut.Buttons.TravelMapList).IsUpWith(keyModifiers))
                 {
 
@@ -736,7 +772,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         protected virtual void ZoomMapTextures()
         {
             // Exit cropped rendering
-            if (!RegionSelected || !zoom)
+            if (!RegionSelected || zoomLevel <= minZoomLevel)
             {
                 regionTextureOverlayPanel.BackgroundTextureLayout = BackgroundLayout.StretchToFill;
                 if (DaggerfallUnity.Settings.TravelMapLocationsOutline)
@@ -756,31 +792,45 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             // Centre cropped porition over mouse using classic dimensions
             int width = (int)regionTextureOverlayPanelRect.width;
             int height = (int)regionTextureOverlayPanelRect.height;
-            int zoomWidth = width / (zoomfactor * 2);
-            int zoomHeight = height / (zoomfactor * 2);
+            int zoomedWidth = Mathf.Max(1, (int)(width / zoomLevel));
+            int zoomedHeight = Mathf.Max(1, (int)(height / zoomLevel));
+            int zoomWidth = zoomedWidth / 2;
+            int zoomHeight = zoomedHeight / 2;
             int startX = (int)zoomPosition.x - zoomWidth;
-            int startY = (int)(height + (-zoomPosition.y - zoomHeight)) + regionPanelOffset;
+            int startY = (int)zoomPosition.y - zoomHeight;
 
             // Clamp to edges
             if (startX < 0)
                 startX = 0;
-            else if (startX + width / zoomfactor >= width)
-                startX = width - width / zoomfactor;
+            else if (startX + zoomedWidth >= width)
+                startX = width - zoomedWidth;
             if (startY < 0)
                 startY = 0;
-            else if (startY + height / zoomfactor >= height)
-                startY = height - height / zoomfactor;
+            else if (startY + zoomedHeight >= height)
+                startY = height - zoomedHeight;
 
             zoomOffset = new Vector2(startX, startY);
+
+            // Unity's GUI.DrawTextureWithTexCoords (what BackgroundLayout.Cropped uses, see
+            // BaseScreenComponent.cs) samples its texCoords.y bottom-up, not top-down like startY/
+            // zoomOffset (and every other coordinate in this file) - confirmed on-device: the crop was
+            // consistently positioned over the correct area of the world (pan/zoom both felt right,
+            // direction-wise), but its *contents* displayed vertically mirrored within that crop, so a
+            // tap on a visible dot resolved to a real but different location, and the debug crosshair
+            // rendered outside the visible viewport entirely. zoomOffset/startY stay as the conceptual,
+            // top-down "which area is shown" value every other calculation (GetCoordinates, panning)
+            // already relies on and has been validated against - only the Rect actually handed to
+            // rendering needs converting to the bottom-up convention, via renderStartY below.
+            int renderStartY = height - startY - zoomedHeight;
 
             // Set cropped area in region texture - can be a replacement texture so need to determine ratio compared to classic
             float ratioX = regionTexture.width / (float)width;
             float ratioY = regionTexture.height / (float)height;
             regionTextureOverlayPanel.BackgroundTextureLayout = BackgroundLayout.Cropped;
-            regionTextureOverlayPanel.BackgroundCroppedRect = new Rect(startX * ratioX, startY * ratioY, width / zoomfactor * ratioX, height / zoomfactor * ratioY);
+            regionTextureOverlayPanel.BackgroundCroppedRect = new Rect(startX * ratioX, renderStartY * ratioY, zoomedWidth * ratioX, zoomedHeight * ratioY);
 
-            // Set cropped area in location dots panel - always at classic dimensions            
-            Rect locationDotsNewRect = new Rect(startX, startY, width / zoomfactor, height / zoomfactor);
+            // Set cropped area in location dots panel - always at classic dimensions
+            Rect locationDotsNewRect = new Rect(startX, renderStartY, zoomedWidth, zoomedHeight);
             if (DaggerfallUnity.Settings.TravelMapLocationsOutline)
                 for (int i = 0; i < outlineDisplacements.Length; i++)
                 {
@@ -804,7 +854,100 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         // Show/hide map borders based on state
         protected virtual void UpdateBorder()
         {
-            borderPanel.Enabled = (RegionSelected && !zoom);
+            borderPanel.Enabled = (RegionSelected && zoomLevel <= minZoomLevel);
+        }
+
+        // Touch equivalent of the desktop right-click-to-zoom / shift-drag-to-pan controls above. Mirrors
+        // the two-touch pinch convention DaggerfallAutomapWindow.HandleTouchControls already established
+        // for this project's Android input (distance-between-touches delta drives zoom), rather than
+        // introducing a new gesture scheme. A single-finger drag pans while already zoomed in, the same
+        // way holding shift does on desktop - there's no modifier key on touch, so a mobile platform check
+        // takes its place (see the call site in Update()).
+        //
+        // Tracks how far a gesture has moved so its eventual release doesn't also fire ClickHandler's
+        // location-select at wherever the finger happened to lift - see suppressNextClick.
+        protected virtual void HandleTouchZoomPan(Vector2 currentMousePos)
+        {
+            if (Input.touchCount == 1)
+            {
+                Touch touch = Input.GetTouch(0);
+                if (touch.phase == TouchPhase.Began)
+                {
+                    touchPanDistance = 0f;
+                    lastPanTouchPos = currentMousePos;
+                }
+                else if (touch.phase == TouchPhase.Moved)
+                {
+                    touchPanDistance += touch.deltaPosition.magnitude;
+                    if (touchPanDistance > tapMoveThreshold)
+                        suppressNextClick = true;
+
+                    if (zoomLevel > minZoomLevel)
+                    {
+                        // Drag-to-pan: content should follow the finger horizontally - dragging right
+                        // reveals content that was further left, the inverse of the desktop shift-drag
+                        // behavior above, which centers the zoom on wherever the pointer currently is
+                        // instead. Vertical is also content-follows-finger (dragging down reveals content
+                        // from above) - inverted relative to X because the renderStartY conversion in
+                        // ZoomMapTextures flips which direction "down" means for the rendered crop. Not
+                        // scaled by 1/zoomLevel - the per-pixel pan speed already felt right at the
+                        // fixed touchPanSpeed tuned earlier; this only changes what "position" means
+                        // (content-space, not panel-space), not how far a given drag should move it.
+                        Vector2 delta = (currentMousePos - lastPanTouchPos) * touchPanSpeed;
+                        zoomPosition.x -= delta.x;
+                        zoomPosition.y -= delta.y;
+                        ZoomMapTextures();
+                    }
+                    lastPanTouchPos = currentMousePos;
+                }
+            }
+            else if (Input.touchCount == 2)
+            {
+                Touch touchZero = Input.GetTouch(0);
+                Touch touchOne = Input.GetTouch(1);
+
+                if (touchZero.phase == TouchPhase.Began || touchOne.phase == TouchPhase.Began)
+                {
+                    // A second finger landing mid-gesture is always a pinch starting, never a tap.
+                    // Anchor the zoom center here, using whatever zoom/crop was in effect before this
+                    // gesture started - NOT re-derived every Moved frame by converting the raw midpoint
+                    // through the zoom transform again, which coupled the currently-changing zoomLevel
+                    // with the previous frame's (already slightly stale) zoomOffset and made the crop
+                    // visibly swim/feel unstable during a pinch. Moved frames below instead apply the
+                    // midpoint's movement as an incremental pan (same delta-based approach as the
+                    // single-finger drag above), which doesn't have that feedback problem.
+                    //
+                    // Uses the true midpoint between both touches, converted through ScreenToPanelPosition
+                    // - NOT currentMousePos (NativePanel.ScaledMousePosition), which only ever tracks a
+                    // single finger (touch-to-mouse emulation has no concept of a second pointer).
+                    lastPinchDistance = Vector2.Distance(touchZero.position, touchOne.position);
+                    lastPinchMidpointPanel = ScreenToPanelPosition((touchZero.position + touchOne.position) * 0.5f);
+                    zoomPosition = PanelToContent(lastPinchMidpointPanel);
+                    suppressNextClick = true;
+                }
+                else if (touchZero.phase == TouchPhase.Moved || touchOne.phase == TouchPhase.Moved)
+                {
+                    float currentPinchDistance = Vector2.Distance(touchZero.position, touchOne.position);
+                    float distanceChange = currentPinchDistance - lastPinchDistance;
+                    zoomLevel = Mathf.Clamp(zoomLevel + distanceChange * pinchZoomSpeed, minZoomLevel, maxZoomLevel);
+                    lastPinchDistance = currentPinchDistance;
+
+                    // Pinch-pan: a long pinch gesture (e.g. 1x all the way to max zoom) naturally
+                    // involves the midpoint between the two fingers drifting across the screen, not just
+                    // the distance between them changing - without this, the crop stayed centered on
+                    // wherever the pinch started while zooming shrunk the crop around that now-stale
+                    // point, producing a large, disorienting mismatch by the time the gesture finished
+                    // (the "further zoomed in, the more inverted" symptom). Same content-follows-the-
+                    // finger convention as the single-finger drag above.
+                    Vector2 currentMidpointPanel = ScreenToPanelPosition((touchZero.position + touchOne.position) * 0.5f);
+                    Vector2 pinchPanDelta = (currentMidpointPanel - lastPinchMidpointPanel) * touchPanSpeed;
+                    zoomPosition.x -= pinchPanDelta.x;
+                    zoomPosition.y -= pinchPanDelta.y; // matches the single-finger drag's vertical convention above
+                    lastPinchMidpointPanel = currentMidpointPanel;
+
+                    ZoomMapTextures();
+                }
+            }
         }
 
         // Set region block for identify overlay
@@ -917,6 +1060,31 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         // Handle clicks on the main panel
         protected virtual void ClickHandler(BaseScreenComponent sender, Vector2 position)
         {
+            // A touch gesture that panned or pinched shouldn't also select whatever it happened to end
+            // on release - see HandleTouchZoomPan.
+            if (suppressNextClick)
+            {
+                suppressNextClick = false;
+                return;
+            }
+
+            // ClickHandler fires from base.Update()'s own input dispatch, which runs before this
+            // window's Update() override (and therefore before this frame's zoom/pan and hit-test
+            // refresh) - force a fresh hit-test here so a tap's selection always matches the
+            // currently-zoomed view rather than whatever was last computed a frame earlier.
+            UpdateMouseOverLocation();
+
+            // Flash the same crosshair the Find/At feature uses at the exact world-pixel this tap
+            // resolved to, giving the player immediate visual confirmation of where their tap registered
+            // - particularly useful while zoomed in, where a dense cluster of locations can make it hard
+            // to tell at a glance whether a tap landed on the intended one.
+            if (RegionSelected)
+            {
+                Vector2 tapCoords = GetCoordinates();
+                StartIdentify();
+                UpdateIdentifyTextureForPosition((int)tapCoords.x, (int)tapCoords.y, selectedRegion);
+            }
+
             position.y -= regionPanelOffset;
 
             // Ensure clicks are inside region texture
@@ -1111,7 +1279,8 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             horizontalArrowButton.Enabled = false;
             verticalArrowButton.Enabled = false;
             findButton.Enabled = false;
-            zoom = false;
+            zoomLevel = minZoomLevel;
+            suppressNextClick = false;
             ZoomMapTextures();
             StartIdentify();
             UpdateIdentifyTextureForPlayerRegion();
@@ -1149,16 +1318,17 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         {
             string mapName = selectedRegionMapNames[mapIndex];
             Vector2 origin = offsetLookup[mapName];
-            int height = (int)regionTextureOverlayPanelRect.height;
 
             Vector2 results = Vector2.zero;
             Vector2 pos = regionTextureOverlayPanel.ScaledMousePosition;
 
-            if (zoom)
+            if (zoomLevel > minZoomLevel)
             {
-                results.x = (int)Math.Floor(pos.x / zoomfactor + zoomOffset.x + origin.x);
-                float diffy = height / zoomfactor - pos.y;
-                results.y = (int)Math.Floor(height - pos.y / zoomfactor - zoomOffset.y - diffy + origin.y);
+                // zoomOffset is content-space (see PanelToContent/ZoomMapTextures), and pos is already
+                // content-space too (regionTextureOverlayPanel.ScaledMousePosition excludes
+                // regionPanelOffset) - both axes map the same direct way, no flip on either.
+                results.x = (int)Math.Floor(pos.x / zoomLevel + zoomOffset.x + origin.x);
+                results.y = (int)Math.Floor(pos.y / zoomLevel + zoomOffset.y + origin.y);
             }
             else
             {
@@ -1169,6 +1339,36 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             return results;
         }
 
+        // Converts a NativePanel-space position (e.g. currentMousePos) into region-content-space
+        // (pre-origin, same units as GetCoordinates' "pos") honoring whatever zoom/crop is currently in
+        // effect - the inverse of GetCoordinates' own transform, stopping one step short (no origin
+        // added, since callers use this to set zoomPosition/zoomOffset, not to look up a world pixel).
+        // zoomPosition must always be in this same content-space, regardless of which gesture sets it -
+        // mixing it with raw panel-space (as a previous version of this code did when re-centering mid
+        // pinch/zoom) produced a transform that was only correct exactly at the crop's center and grew
+        // increasingly mirrored toward its edges.
+        protected Vector2 PanelToContent(Vector2 panelPos)
+        {
+            float regionLocalX = panelPos.x;
+            float regionLocalY = panelPos.y - regionPanelOffset;
+            if (zoomLevel > minZoomLevel)
+                return new Vector2(regionLocalX / zoomLevel + zoomOffset.x, regionLocalY / zoomLevel + zoomOffset.y);
+            return new Vector2(regionLocalX, regionLocalY);
+        }
+
+        // Converts a raw touch/screen position (e.g. Touch.position, in Unity's bottom-left-origin
+        // screen pixels) into NativePanel's own scaled/local space - the same space currentMousePos
+        // (NativePanel.ScaledMousePosition) is normally in. Replicates BaseScreenComponent's own
+        // mousePosition/scaledMousePosition conversion (flip Y, subtract the panel's rect origin, divide
+        // by its LocalScale) for an arbitrary position, since that conversion is otherwise only ever
+        // applied to the single emulated mouse pointer - needed to find the true midpoint between two
+        // simultaneous touches for pinch, which the emulated pointer alone cannot give.
+        protected Vector2 ScreenToPanelPosition(Vector2 rawScreenPos)
+        {
+            Vector2 flipped = new Vector2(rawScreenPos.x, AScreen.height - rawScreenPos.y);
+            Rect rect = NativePanel.Rectangle;
+            return new Vector2((flipped.x - rect.xMin) / NativePanel.LocalScale.x, (flipped.y - rect.yMin) / NativePanel.LocalScale.y);
+        }
 
         // Check if player mouse over valid location while region selected & not finding location
         protected virtual void UpdateMouseOverLocation()
@@ -1255,7 +1455,7 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
             int x = 0;
             int y = 0;
 
-            if (zoom)
+            if (zoomLevel > minZoomLevel)
             {
                 var zoomCoords = GetCoordinates();
                 x = (int)zoomCoords.x;

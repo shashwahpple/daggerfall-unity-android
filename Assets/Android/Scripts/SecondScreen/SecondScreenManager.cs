@@ -70,9 +70,7 @@ namespace DaggerfallWorkshop
 
             SpellListPanel spellList = CreatePanel<SpellListPanel>(secondScreenCamera, "SpellListPanel");
 
-            // Placeholder until Map's real content panel exists - that's a separate deferred phase.
-            PlaceholderContentPanel mapPage = CreatePanel<PlaceholderContentPanel>(secondScreenCamera, "MapPage");
-            mapPage.Message = "Map (coming soon)";
+            HomePanel homePage = CreatePanel<HomePanel>(secondScreenCamera, "HomePage");
 
             CharacterPanel character = CreatePanel<CharacterPanel>(secondScreenCamera, "CharacterPanel");
 
@@ -81,7 +79,7 @@ namespace DaggerfallWorkshop
             // page's raycaster present (even ones this hides immediately) since it never rescans.
             ContentTabStripPanel tabStrip = CreatePanel<ContentTabStripPanel>(secondScreenCamera, "ContentTabStripPanel");
             tabStrip.AddTab("Inventory", doll.gameObject, equipment.gameObject);
-            tabStrip.AddTab("Map", mapPage.gameObject);
+            tabStrip.AddTab("Home", homePage.gameObject);
             tabStrip.AddTab("Spell List", spellList.gameObject);
             tabStrip.AddTab("Character", character.gameObject);
             tabStrip.BuildAndShowFirstTab();

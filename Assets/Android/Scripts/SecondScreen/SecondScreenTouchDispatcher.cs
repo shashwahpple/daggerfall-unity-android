@@ -129,6 +129,16 @@ namespace DaggerfallWorkshop
 
             if (raycastResults.Count > 0)
             {
+                // Every pre-existing panel occupies a mutually exclusive screen region (tab content vs.
+                // the strips above it), so at most one raycaster ever returned a hit here and insertion
+                // order never mattered. KeyboardPanel breaks that: it's a global overlay that can sit on
+                // top of whatever tab is showing, so its raycaster and the tab's raycaster can both hit
+                // the same tap. Sort by each hit's own canvas sorting order so the topmost-drawn panel
+                // (KeyboardPanel sets sortingOrder = 100 - see SecondScreenManager) wins, instead of
+                // whichever raycaster happened to run first in scan order.
+                if (raycastResults.Count > 1)
+                    raycastResults.Sort((a, b) => b.sortingOrder.CompareTo(a.sortingOrder));
+
                 eventData.pointerCurrentRaycast = raycastResults[0];
                 eventData.pointerPressRaycast = raycastResults[0];
 

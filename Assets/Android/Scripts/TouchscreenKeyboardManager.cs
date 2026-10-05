@@ -9,6 +9,7 @@
 // Notes:
 //
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,8 +22,14 @@ namespace DaggerfallWorkshop.Game
     {
         public static TouchscreenKeyboardManager Instance { get; private set; }
         public static bool SubmittedInput { get; private set; }
-        public bool IsKeyboardActive { get { return dummyInputField.gameObject.activeSelf && currentTextbox != null; }}
-        
+        public bool IsKeyboardActive { get { return currentTextbox != null; } }
+
+        // Fired whenever a textbox wants keyboard input (ToggleKeyboardOn) or gives it up
+        // (ToggleKeyboardOff) - lets the Display 2 keyboard panel (see Assets/Android/Scripts/SecondScreen)
+        // show/hide itself without duplicating this class's own tap-detection/visibility logic.
+        public event Action<TextBox> OnKeyboardRequested;
+        public event Action OnKeyboardDismissed;
+
         [SerializeField] private TMPro.TMP_InputField dummyInputField;
         private TextBox currentTextbox;
         private HashSet<TextBox> registeredTextboxes = new HashSet<TextBox>();
@@ -81,10 +88,34 @@ namespace DaggerfallWorkshop.Game
         }
         public void RegisterTextbox(TextBox textBox) => registeredTextboxes.Add(textBox);
         public void UnregisterTextbox(TextBox textBox) => registeredTextboxes.Remove(textBox);
+
+        // Manual override for the Display 2 Home tab's "Keyboard" button - opens the keyboard for
+        // whatever registered textbox is currently visible, same visibility rule Update()'s own tap
+        // detection uses above, without needing a precise tap to land on Display 1's (often small) field.
+        // Returns false (and opens nothing) if no visible textbox exists right now.
+        public bool TryOpenKeyboardForVisibleTextbox()
+        {
+            TextBox textBox = registeredTextboxes.FirstOrDefault(p => IsTextboxVisible(p) && !p.ReadOnly);
+            if (textBox == null)
+                return false;
+
+            ToggleKeyboardOn(textBox);
+            return true;
+        }
+
         public void ToggleKeyboardOn(TextBox textBox)
         {
             // Debug.Log("Opening android keyboard for textbox: " + textBox.Name + " with text: " + textBox.Text);
             this.currentTextbox = textBox;
+            OnKeyboardRequested?.Invoke(textBox);
+
+            // On a dual-screen device the Display 2 keyboard panel handles this instead (it subscribes to
+            // OnKeyboardRequested above) - don't also pop the native Android keyboard over Display 1.
+            // currentTextbox is still set either way, since that's what OnDummyInputFieldChanged/our own
+            // Display 2 keyboard both write typed text into.
+            if (Display.displays.Length >= 2)
+                return;
+
             dummyInputField.text = textBox.Text;
             dummyInputField.gameObject.SetActive(true);
             dummyInputField.Select();
@@ -94,6 +125,7 @@ namespace DaggerfallWorkshop.Game
             currentTextbox = null;
             dummyInputField.text = "";
             dummyInputField.gameObject.SetActive(false);
+            OnKeyboardDismissed?.Invoke();
         }
         private IEnumerator SubmitCoroutine()
         {
@@ -103,11 +135,16 @@ namespace DaggerfallWorkshop.Game
             yield return new WaitForEndOfFrame();
             SubmittedInput = false;
         }
-        private void OnDummyInputFieldSubmit(string submittedVal)
+        // Lets an external input source (the Display 2 keyboard's own Enter key) signal "submit" the same
+        // way the native Android keyboard's own submit does, without needing to drive dummyInputField
+        // itself - DaggerfallInputMessageBox and TextBox both already check TouchscreenKeyboardManager.
+        // SubmittedInput directly (see Part 2 research), this just reuses that exact proven mechanism.
+        public void SignalSubmit()
         {
             StartCoroutine(SubmitCoroutine());
             ToggleKeyboardOff();
         }
+        private void OnDummyInputFieldSubmit(string submittedVal) => SignalSubmit();
         private void OnDummyInputFieldChanged(string newVal)
         {
             Debug.Log("dummy input changed: " + newVal);

@@ -84,6 +84,11 @@ namespace DaggerfallWorkshop
             tabStrip.AddTab("Character", character.gameObject);
             tabStrip.BuildAndShowFirstTab();
 
+            // Not a tab - a global overlay that shows/hides itself over whatever tab is active whenever
+            // Display 1 needs text input (see KeyboardPanel). Created last and given a high Canvas sorting
+            // order so it draws above every panel above regardless of creation order.
+            CreatePanel<KeyboardPanel>(secondScreenCamera, "KeyboardPanel");
+
             // Confirmed on-device: the AYN Thor exposes each screen as a separate Touchscreen device with
             // correct per-touch displayIndex, so route Display 2 taps by reading that directly instead of
             // touching the shared EventSystem/StandaloneInputModule (see SecondScreenTouchDispatcher).

@@ -1829,11 +1829,21 @@ namespace DaggerfallWorkshop.Game
         /// <param name="nearestHit">[out] the nearest RaycastHit with automap layer geometry, might be null if no geometry was hit</param>
         private void GetRayCastNearestHitOnAutomapLayer(Vector2 screenPosition, out RaycastHit? nearestHit)
         {
+            nearestHit = null;
+
+            // cameraAutomap's GameObject is destroyed in UpdateAutomapStateOnWindowPop() when the automap
+            // window closes - if something still calls in here afterward (e.g. the window's own Update()
+            // running once more before fully unwinding), cameraAutomap is a destroyed Unity object here,
+            // which == null correctly catches. Without this guard, ScreenPointToRay throws every such
+            // frame, and (since callers never anticipated a hit-test method throwing) can prevent whatever
+            // runs later in the same Update() - including the window's own input handling - from running.
+            if (cameraAutomap == null)
+                return;
+
             Ray ray = cameraAutomap.ScreenPointToRay(screenPosition);
 
             RaycastHit[] hits = Physics.RaycastAll(ray, 10000, 1 << layerAutomap);
 
-            nearestHit = null;
             float nearestDistance = float.MaxValue;
             foreach (RaycastHit hit in hits)
             {

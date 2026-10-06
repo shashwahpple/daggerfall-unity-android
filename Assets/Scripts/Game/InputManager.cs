@@ -1689,7 +1689,12 @@ namespace DaggerfallWorkshop.Game
                 controllerCursorPosition = CapturedInput.mousePosition;
             }
 
-            if (movingMouse)
+            // A plain tap never produces a Mouse X/Y delta (movingMouse only trips on drag), so
+            // without this a tap while the controller cursor is showing would click at the stale
+            // cursor position instead of the tap's own position. Display1TouchBeganThisFrame()
+            // only ever looks at Display 1's own Touchscreen device, so a Display 2 tap can never
+            // trigger this.
+            if (movingMouse || DualDisplayTouch.Display1TouchBeganThisFrame())
                 usingControllerCursor = false;
 
             if (CursorVisible && UsingController)

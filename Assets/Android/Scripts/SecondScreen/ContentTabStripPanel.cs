@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,6 +28,7 @@ namespace DaggerfallWorkshop
             public string Label;
             public GameObject[] PageRoots;
             public Image ButtonImage;
+            public Action OnSecondTap;
         }
 
         readonly List<Tab> tabs = new List<Tab>();
@@ -53,13 +55,34 @@ namespace DaggerfallWorkshop
         }
 
         /// <summary>
-        /// Builds the tab button row and selects the first registered tab, hiding the rest. Call once,
-        /// after every AddTab() call.
+        /// Registers a callback fired when the player taps an already-selected tab's button again (a
+        /// no-op otherwise). Used to open the real Display 1 window for a tab on a second tap - see
+        /// SecondScreenManager and CharacterPanel. Call after the matching AddTab().
         /// </summary>
-        public void BuildAndShowFirstTab()
+        public void SetSecondTapAction(string label, Action onSecondTap)
+        {
+            Tab tab = tabs.Find(t => t.Label == label);
+            if (tab != null)
+                tab.OnSecondTap = onSecondTap;
+        }
+
+        /// <summary>
+        /// Builds the tab button row and selects a tab, hiding the rest. Call once, after every AddTab()
+        /// call. Selects the tab matching defaultLabel if given and found, otherwise index 0.
+        /// </summary>
+        public void BuildAndShowFirstTab(string defaultLabel = null)
         {
             BuildUI();
-            SelectTab(0, playSound: false);
+
+            int defaultIndex = 0;
+            if (defaultLabel != null)
+            {
+                int found = tabs.FindIndex(t => t.Label == defaultLabel);
+                if (found >= 0)
+                    defaultIndex = found;
+            }
+
+            SelectTab(defaultIndex, playSound: false);
         }
 
         void BuildUI()
@@ -97,7 +120,7 @@ namespace DaggerfallWorkshop
                 tab.ButtonImage = image;
 
                 Button button = buttonGO.AddComponent<Button>();
-                button.onClick.AddListener(() => SelectTab(index));
+                button.onClick.AddListener(() => OnTabButtonClicked(index));
 
                 GameObject labelGO = new GameObject("Label");
                 labelGO.transform.SetParent(buttonGO.transform, false);
@@ -112,6 +135,17 @@ namespace DaggerfallWorkshop
                 labelRect.offsetMin = Vector2.zero;
                 labelRect.offsetMax = Vector2.zero;
             }
+        }
+
+        void OnTabButtonClicked(int index)
+        {
+            if (index == selectedIndex)
+            {
+                tabs[index].OnSecondTap?.Invoke();
+                return;
+            }
+
+            SelectTab(index);
         }
 
         void SelectTab(int index, bool playSound = true)

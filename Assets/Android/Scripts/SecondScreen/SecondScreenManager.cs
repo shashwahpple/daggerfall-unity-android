@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using DaggerfallWorkshop.Game;
+using DaggerfallWorkshop.Game.UserInterfaceWindows;
 
 namespace DaggerfallWorkshop
 {
@@ -82,7 +84,12 @@ namespace DaggerfallWorkshop
             tabStrip.AddTab("Home", homePage.gameObject);
             tabStrip.AddTab("Spell List", spellList.gameObject);
             tabStrip.AddTab("Character", character.gameObject);
-            tabStrip.BuildAndShowFirstTab();
+            // Home has no real-window equivalent, so it gets no second-tap action.
+            tabStrip.SetSecondTapAction("Inventory", OnInventorySecondTap);
+            tabStrip.SetSecondTapAction("Spell List", OnSpellListSecondTap);
+            tabStrip.SetSecondTapAction("Character", OnCharacterSecondTap);
+            // Home is the default every time this is rebuilt (every scene load) - never persisted.
+            tabStrip.BuildAndShowFirstTab("Home");
 
             // Not a tab - a global overlay that shows/hides itself over whatever tab is active whenever
             // Display 1 needs text input (see KeyboardPanel). Created last and given a high Canvas sorting
@@ -93,6 +100,65 @@ namespace DaggerfallWorkshop
             // correct per-touch displayIndex, so route Display 2 taps by reading that directly instead of
             // touching the shared EventSystem/StandaloneInputModule (see SecondScreenTouchDispatcher).
             gameObject.AddComponent<SecondScreenTouchDispatcher>();
+        }
+
+        // Second-tap handlers for the outer ContentTabStripPanel - tapping an already-selected tab again
+        // opens the matching real Display 1 window, toggling it closed on a third tap. Same
+        // open-if-nothing-blocking / close-if-already-on-top pattern HomePanel's Local Map button uses,
+        // and the same messages AynThorDPadHandler already posts for Inventory and Character.
+
+        void OnInventorySecondTap()
+        {
+            if (DaggerfallUI.UIManager.TopWindow == DaggerfallUI.Instance.InventoryWindow)
+            {
+                DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
+                DaggerfallUI.UIManager.PopWindow();
+                return;
+            }
+
+            if (GameManager.IsGamePaused || DaggerfallUI.UIManager.WindowCount > 0)
+                return;
+
+            DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
+            DaggerfallUI.PostMessage(DaggerfallUIMessages.dfuiOpenInventoryWindow);
+        }
+
+        void OnCharacterSecondTap()
+        {
+            // DaggerfallUI doesn't expose a public reference to its character sheet window instance (only
+            // Inventory/Automap/ExteriorAutomap have one) - a type check is enough since there's only ever
+            // one character sheet window instance and PopWindow() doesn't need the exact reference anyway.
+            if (DaggerfallUI.UIManager.TopWindow is DaggerfallCharacterSheetWindow)
+            {
+                DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
+                DaggerfallUI.UIManager.PopWindow();
+                return;
+            }
+
+            if (GameManager.IsGamePaused || DaggerfallUI.UIManager.WindowCount > 0)
+                return;
+
+            DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
+            DaggerfallUI.PostMessage(DaggerfallUIMessages.dfuiOpenCharacterSheetWindow);
+        }
+
+        void OnSpellListSecondTap()
+        {
+            if (DaggerfallUI.UIManager.TopWindow is DaggerfallSpellBookWindow)
+            {
+                DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
+                DaggerfallUI.UIManager.PopWindow();
+                return;
+            }
+
+            if (GameManager.IsGamePaused || DaggerfallUI.UIManager.WindowCount > 0)
+                return;
+
+            // dfuiOpenSpellBookWindow's handler (DaggerfallUI.cs) already validates this itself (blocks
+            // mid-cast-animation, shows "noSpellbook" HUD text if the player doesn't own one) - no extra
+            // guard needed here.
+            DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
+            DaggerfallUI.PostMessage(DaggerfallUIMessages.dfuiOpenSpellBookWindow);
         }
 
         Camera CreateSecondScreenCamera()

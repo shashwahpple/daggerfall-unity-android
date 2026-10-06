@@ -1,4 +1,6 @@
 using UnityEngine;
+using DaggerfallWorkshop.Game;
+using DaggerfallWorkshop.Game.UserInterfaceWindows;
 
 namespace DaggerfallWorkshop
 {
@@ -47,7 +49,30 @@ namespace DaggerfallWorkshop
             subTabStrip.AnchorMaxY = SubTabStripAnchorMaxY;
             subTabStrip.AddTab("Skills", skills.gameObject);
             subTabStrip.AddTab("Journal", journal.gameObject);
+            // Skills has no real-window equivalent, so it gets no second-tap action (same as Home/Map at
+            // the outer strip level - see SecondScreenManager).
+            subTabStrip.SetSecondTapAction("Journal", OnJournalSecondTap);
             subTabStrip.BuildAndShowFirstTab();
+        }
+
+        void OnJournalSecondTap()
+        {
+            // Toggle like HomePanel's Local Map button: close the real window if it's already the one on
+            // top. Type + DisplayMode check since DaggerfallQuestJournalWindow is also reused for the
+            // Notebook (see HomePanel's Notes button) - a plain type check alone can't tell them apart.
+            if (DaggerfallUI.UIManager.TopWindow is DaggerfallQuestJournalWindow journalWindow &&
+                journalWindow.DisplayMode == DaggerfallQuestJournalWindow.JournalDisplay.ActiveQuests)
+            {
+                DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
+                DaggerfallUI.UIManager.PopWindow();
+                return;
+            }
+
+            if (GameManager.IsGamePaused || DaggerfallUI.UIManager.WindowCount > 0)
+                return;
+
+            DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
+            DaggerfallUI.PostMessage(DaggerfallUIMessages.dfuiOpenQuestJournalWindow);
         }
 
         static T CreateSubPage<T>(Transform parent, string name) where T : Component

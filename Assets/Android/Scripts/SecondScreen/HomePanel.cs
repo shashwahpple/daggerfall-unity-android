@@ -46,15 +46,35 @@ namespace DaggerfallWorkshop
 
             rootGO.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.6f);
 
-            GameObject gridGO = new GameObject("ButtonGrid");
-            gridGO.transform.SetParent(rootGO.transform, false);
-            RectTransform gridRect = gridGO.AddComponent<RectTransform>();
-            gridRect.anchorMin = new Vector2(0.1f, 0.1f);
-            gridRect.anchorMax = new Vector2(0.9f, 0.9f);
-            gridRect.offsetMin = Vector2.zero;
-            gridRect.offsetMax = Vector2.zero;
+            // Stacks the button grid and the Travel Options row below it, each centered at its own
+            // natural width. childControlWidth/Height true so the parent actually applies each child's
+            // own reported preferred size instead of just reading it - GridLayoutGroup auto-reports 910
+            // wide for a 2-column fixed grid (2*440 cellSize + 30 spacing), and the Travel Options row
+            // reports the same via its own LayoutElement below, so both end up exactly 910 wide without
+            // duplicating that math here. Without control enabled, a child keeps its untouched default
+            // RectTransform size (~100x100) and only LayoutGroup-driven children (like GridLayoutGroup's
+            // own fixed-size cells) still render correctly - everything else, like the Travel Options
+            // row's HorizontalLayoutGroup, would be squeezed into that leftover ~100px.
+            GameObject contentGO = new GameObject("Content");
+            contentGO.transform.SetParent(rootGO.transform, false);
+            RectTransform contentRect = contentGO.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0.1f, 0.1f);
+            contentRect.anchorMax = new Vector2(0.9f, 0.9f);
+            contentRect.offsetMin = Vector2.zero;
+            contentRect.offsetMax = Vector2.zero;
 
-            // Fixed 2-column grid, fixed cell size - comfortably fits all 6 buttons here.
+            VerticalLayoutGroup contentLayout = contentGO.AddComponent<VerticalLayoutGroup>();
+            contentLayout.childAlignment = TextAnchor.MiddleCenter;
+            contentLayout.spacing = 30f;
+            contentLayout.childControlWidth = true;
+            contentLayout.childControlHeight = true;
+
+            GameObject gridGO = new GameObject("ButtonGrid");
+            gridGO.transform.SetParent(contentGO.transform, false);
+            gridGO.AddComponent<RectTransform>();
+
+            // Fixed 2-column grid, fixed cell size - comfortably fits the 5 buttons here (Travel
+            // Options moved below, see AddTransportModeRow).
             GridLayoutGroup grid = gridGO.AddComponent<GridLayoutGroup>();
             grid.childAlignment = TextAnchor.MiddleCenter;
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
@@ -65,30 +85,38 @@ namespace DaggerfallWorkshop
             AddButton(gridGO.transform, "Fast Travel", OnFastTravelClicked);
             AddButton(gridGO.transform, "Local Map", OnLocalMapClicked);
             AddButton(gridGO.transform, "Status", OnStatusClicked);
-            AddTransportModeRow(gridGO.transform);
             AddButton(gridGO.transform, "Notes", OnNotesClicked);
             AddButton(gridGO.transform, "Keyboard", OnKeyboardClicked);
+
+            AddTransportModeRow(contentGO.transform);
         }
 
-        // Occupies the same grid cell the old single "Travel Options" button used - a compact row of
-        // Foot/Horse/Cart/Ship keys that set TransportMode directly instead of opening the real
-        // DaggerfallTransportWindow, per the same validation that window's own open message uses
-        // (see TransportActions.CanChangeTransportMode()).
+        // A row of Foot/Horse/Cart/Ship keys below the main button grid, spanning the grid's own content
+        // width (910 = 2*440 cellSize + 30 spacing) so it lines up with the buttons above it. 3 gaps of
+        // 10px between 4 equal-width buttons comes out to exactly 220 each - half the width of the
+        // buttons above. Sets TransportMode directly instead of opening the real DaggerfallTransportWindow,
+        // per the same validation that window's own open message uses (see
+        // TransportActions.CanChangeTransportMode()).
         void AddTransportModeRow(Transform parent)
         {
-            GameObject cellGO = new GameObject("TravelOptionsCell");
-            cellGO.transform.SetParent(parent, false);
+            GameObject rowGO = new GameObject("TravelOptionsRow");
+            rowGO.transform.SetParent(parent, false);
+            rowGO.AddComponent<RectTransform>();
 
-            HorizontalLayoutGroup layout = cellGO.AddComponent<HorizontalLayoutGroup>();
+            LayoutElement rowLayoutElement = rowGO.AddComponent<LayoutElement>();
+            rowLayoutElement.preferredWidth = 910f;
+            rowLayoutElement.preferredHeight = 100f;
+
+            HorizontalLayoutGroup layout = rowGO.AddComponent<HorizontalLayoutGroup>();
             layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.spacing = 6f;
+            layout.spacing = 10f;
             layout.childForceExpandWidth = true;
             layout.childForceExpandHeight = true;
 
-            footModeButton = AddModeKey(cellGO.transform, "Foot", out footModeImage, () => OnTransportModeClicked(TransportModes.Foot));
-            horseModeButton = AddModeKey(cellGO.transform, "Horse", out horseModeImage, () => OnTransportModeClicked(TransportModes.Horse));
-            cartModeButton = AddModeKey(cellGO.transform, "Cart", out cartModeImage, () => OnTransportModeClicked(TransportModes.Cart));
-            shipModeButton = AddModeKey(cellGO.transform, "Ship", out shipModeImage, () => OnTransportModeClicked(TransportModes.Ship));
+            footModeButton = AddModeKey(rowGO.transform, "Foot", out footModeImage, () => OnTransportModeClicked(TransportModes.Foot));
+            horseModeButton = AddModeKey(rowGO.transform, "Horse", out horseModeImage, () => OnTransportModeClicked(TransportModes.Horse));
+            cartModeButton = AddModeKey(rowGO.transform, "Cart", out cartModeImage, () => OnTransportModeClicked(TransportModes.Cart));
+            shipModeButton = AddModeKey(rowGO.transform, "Ship", out shipModeImage, () => OnTransportModeClicked(TransportModes.Ship));
         }
 
         Button AddModeKey(Transform parent, string label, out Image image, UnityEngine.Events.UnityAction onClick)

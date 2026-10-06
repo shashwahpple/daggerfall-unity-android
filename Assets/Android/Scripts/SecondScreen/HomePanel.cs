@@ -12,9 +12,21 @@ namespace DaggerfallWorkshop
     /// </summary>
     public class HomePanel : MonoBehaviour
     {
+        static readonly Color IdleColor = new Color(0.25f, 0.25f, 0.25f, 0.95f);
+        static readonly Color ActiveColor = new Color(0.85f, 0.7f, 0.15f, 1f);
+        static readonly Color DisabledColor = new Color(0.12f, 0.12f, 0.12f, 0.95f);
+
+        Image footModeImage, horseModeImage, cartModeImage, shipModeImage;
+        Button footModeButton, horseModeButton, cartModeButton, shipModeButton;
+
         void Start()
         {
             BuildUI();
+        }
+
+        void Update()
+        {
+            RefreshTransportModeHighlight();
         }
 
         void BuildUI()
@@ -53,9 +65,57 @@ namespace DaggerfallWorkshop
             AddButton(gridGO.transform, "Fast Travel", OnFastTravelClicked);
             AddButton(gridGO.transform, "Local Map", OnLocalMapClicked);
             AddButton(gridGO.transform, "Status", OnStatusClicked);
-            AddButton(gridGO.transform, "Travel Options", OnTravelOptionsClicked);
+            AddTransportModeRow(gridGO.transform);
             AddButton(gridGO.transform, "Notes", OnNotesClicked);
             AddButton(gridGO.transform, "Keyboard", OnKeyboardClicked);
+        }
+
+        // Occupies the same grid cell the old single "Travel Options" button used - a compact row of
+        // Foot/Horse/Cart/Ship keys that set TransportMode directly instead of opening the real
+        // DaggerfallTransportWindow, per the same validation that window's own open message uses
+        // (see TransportActions.CanChangeTransportMode()).
+        void AddTransportModeRow(Transform parent)
+        {
+            GameObject cellGO = new GameObject("TravelOptionsCell");
+            cellGO.transform.SetParent(parent, false);
+
+            HorizontalLayoutGroup layout = cellGO.AddComponent<HorizontalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 6f;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = true;
+
+            footModeButton = AddModeKey(cellGO.transform, "Foot", out footModeImage, () => OnTransportModeClicked(TransportModes.Foot));
+            horseModeButton = AddModeKey(cellGO.transform, "Horse", out horseModeImage, () => OnTransportModeClicked(TransportModes.Horse));
+            cartModeButton = AddModeKey(cellGO.transform, "Cart", out cartModeImage, () => OnTransportModeClicked(TransportModes.Cart));
+            shipModeButton = AddModeKey(cellGO.transform, "Ship", out shipModeImage, () => OnTransportModeClicked(TransportModes.Ship));
+        }
+
+        Button AddModeKey(Transform parent, string label, out Image image, UnityEngine.Events.UnityAction onClick)
+        {
+            GameObject keyGO = new GameObject(label + "ModeButton");
+            keyGO.transform.SetParent(parent, false);
+
+            image = keyGO.AddComponent<Image>();
+            image.color = IdleColor;
+
+            Button button = keyGO.AddComponent<Button>();
+            button.onClick.AddListener(onClick);
+
+            GameObject labelGO = new GameObject("Label");
+            labelGO.transform.SetParent(keyGO.transform, false);
+            TextMeshProUGUI labelText = labelGO.AddComponent<TextMeshProUGUI>();
+            labelText.text = label;
+            labelText.alignment = TextAlignmentOptions.Center;
+            labelText.fontSize = 22;
+            labelText.color = Color.white;
+            RectTransform labelRect = labelText.rectTransform;
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = Vector2.zero;
+            labelRect.offsetMax = Vector2.zero;
+
+            return button;
         }
 
         void AddButton(Transform parent, string label, UnityEngine.Events.UnityAction onClick)
@@ -128,20 +188,56 @@ namespace DaggerfallWorkshop
             DaggerfallUI.PostMessage(DaggerfallUIMessages.dfuiStatusInfo);
         }
 
-        void OnTravelOptionsClicked()
+        void OnTransportModeClicked(TransportModes mode)
         {
-            // No new save to test this with yet (need one that owns a horse or cart) - kept minimal:
-            // TransportManager.ToggleMount() is the same cycling logic (Foot -> Horse/Cart if owned ->
-            // back to Foot, skipping whatever isn't owned) the real DaggerfallTransportWindow's buttons
-            // drive, so this reuses it directly rather than reimplementing the HasHorse()/HasCart()
-            // checks ourselves. Doesn't cycle to Ship - ToggleMount() itself doesn't either.
-            if (GameManager.IsGamePaused || DaggerfallUI.UIManager.WindowCount > 0)
-                return;
-            if (GameManager.Instance.IsPlayerInside || !GameManager.Instance.PlayerController.isGrounded)
+            if (!TransportActions.CanChangeTransportMode())
                 return;
 
+            TransportManager transportManager = GameManager.Instance.TransportManager;
+            switch (mode)
+            {
+                case TransportModes.Horse:
+                    if (!transportManager.HasHorse())
+                        return;
+                    break;
+                case TransportModes.Cart:
+                    if (!transportManager.HasCart())
+                        return;
+                    break;
+                case TransportModes.Ship:
+                    if (!transportManager.ShipAvailiable())
+                        return;
+                    break;
+            }
+
             DaggerfallUI.Instance.PlayOneShot(SoundClips.ButtonClick);
-            GameManager.Instance.TransportManager.ToggleMount();
+            // Setting Ship here isn't a persistent mode switch - TransportManager.UpdateMode() teleports
+            // to/from the player's ship and resets mode back to Foot synchronously, the same one-shot
+            // action the real DaggerfallTransportWindow's own Ship button triggers.
+            transportManager.TransportMode = mode;
+        }
+
+        void RefreshTransportModeHighlight()
+        {
+            if (footModeImage == null)
+                return; // BuildUI() hasn't run yet (first frame)
+
+            TransportManager transportManager = GameManager.Instance.TransportManager;
+            bool canChange = TransportActions.CanChangeTransportMode();
+            TransportModes currentMode = transportManager.TransportMode;
+
+            SetModeKeyState(footModeButton, footModeImage, canChange, currentMode == TransportModes.Foot);
+            SetModeKeyState(horseModeButton, horseModeImage, canChange && transportManager.HasHorse(), currentMode == TransportModes.Horse);
+            SetModeKeyState(cartModeButton, cartModeImage, canChange && transportManager.HasCart(), currentMode == TransportModes.Cart);
+            // Ship is never "current" - selecting it is a momentary board/unboard action, not a mode the
+            // player stays in (see OnTransportModeClicked).
+            SetModeKeyState(shipModeButton, shipModeImage, canChange && transportManager.ShipAvailiable(), false);
+        }
+
+        void SetModeKeyState(Button button, Image image, bool enabled, bool active)
+        {
+            button.interactable = enabled;
+            image.color = !enabled ? DisabledColor : (active ? ActiveColor : IdleColor);
         }
 
         void OnNotesClicked()

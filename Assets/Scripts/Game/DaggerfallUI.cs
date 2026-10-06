@@ -703,10 +703,9 @@ namespace DaggerfallWorkshop.Game
                     {
                         AddHUDText(TextManager.Instance.GetLocalizedText("cannotChangeTransportationIndoors"));
                     }
-                    else
+                    else if (TransportActions.CanChangeTransportMode())
                     {
-                        if (GameManager.Instance.PlayerController.isGrounded)
-                            uiManager.PushWindow(UIWindowFactory.GetInstance(UIWindowType.Transport, uiManager));
+                        uiManager.PushWindow(UIWindowFactory.GetInstance(UIWindowType.Transport, uiManager));
                     }
                     break;
                 case DaggerfallUIMessages.dfuiOpenBookReaderWindow:

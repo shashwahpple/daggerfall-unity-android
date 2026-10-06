@@ -1083,10 +1083,14 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
 
         private void HandleTouchControls()
         {
+            // Legacy Input.touchCount/GetTouch/touches carry no display attribution (Android's
+            // touch emulation treats a Display 2 touch as if it landed on Display 1 at the same
+            // raw coordinates) - filter through DualDisplayTouch so a Display 2 tap can't be
+            // miscounted as an extra finger here.
             // Panning with one touch
-            if (Input.touchCount == 1)
+            if (DualDisplayTouch.Display1TouchCount() == 1)
             {
-                Touch touch = Input.GetTouch(0);
+                Touch touch = DualDisplayTouch.GetDisplay1Touch(0);
                 if (touch.phase == TouchPhase.Moved)
                 {
                     Vector2 touchDeltaPosition = touch.deltaPosition;
@@ -1110,10 +1114,10 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                 ResetRotationPivotAxisPositionView3D();
             }
             // Zooming and rotating with two touches
-            else if (Input.touchCount == 2)
+            else if (DualDisplayTouch.Display1TouchCount() == 2)
             {
-                Touch touchZero = Input.GetTouch(0);
-                Touch touchOne = Input.GetTouch(1);
+                Touch touchZero = DualDisplayTouch.GetDisplay1Touch(0);
+                Touch touchOne = DualDisplayTouch.GetDisplay1Touch(1);
 
                 if (touchZero.phase == TouchPhase.Began || touchOne.phase == TouchPhase.Began)
                 {
@@ -1159,12 +1163,15 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                     UpdateAutomapView();
                 }
             }
-            else if(Input.touchCount == 3)
+            else if (DualDisplayTouch.Display1TouchCount() == 3)
             {
                 ResetRotationPivotAxisPositionView3D();
-                if (Input.touches.All(p => p.deltaPosition.y > Time.deltaTime))
+                Touch t0 = DualDisplayTouch.GetDisplay1Touch(0);
+                Touch t1 = DualDisplayTouch.GetDisplay1Touch(1);
+                Touch t2 = DualDisplayTouch.GetDisplay1Touch(2);
+                if (t0.deltaPosition.y > Time.deltaTime && t1.deltaPosition.y > Time.deltaTime && t2.deltaPosition.y > Time.deltaTime)
                     ActionIncreaseSliceLevel();
-                else if (Input.touches.All(p => p.deltaPosition.y < -Time.deltaTime))
+                else if (t0.deltaPosition.y < -Time.deltaTime && t1.deltaPosition.y < -Time.deltaTime && t2.deltaPosition.y < -Time.deltaTime)
                     ActionDecreaseSliceLevel();
             }
         }

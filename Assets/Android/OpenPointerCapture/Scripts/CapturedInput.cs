@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using DaggerfallWorkshop.Game;
 
 namespace OpenPointerCapture
 {
@@ -124,10 +125,17 @@ namespace OpenPointerCapture
             }
             else
             {
-                // If not captured, use Unity's default Input system
+                // If not captured, use Unity's default Input system. Android's touch-to-mouse
+                // emulation carries no display attribution at all (see DualDisplayTouch), so a
+                // Display 2 tap would otherwise read here as a Display 1 mouse click - suppress
+                // just the raw Input.* reading while a Display 2 touch is active, not the
+                // internal captured-button state above (that's driven by PointerCaptureManager,
+                // an unrelated native pointer-capture path with nothing to do with touchscreen
+                // display routing).
                 bool wasDownLastFrame = lastButtonState.ContainsKey(button) ? lastButtonState[button] : false;
                 bool isDownThisFrame = currentButtonState.ContainsKey(button) ? currentButtonState[button] : false;
-                return Input.GetMouseButtonDown(button) || (isDownThisFrame && !wasDownLastFrame);
+                bool rawDown = !DualDisplayTouch.IsDisplay2TouchActive() && Input.GetMouseButtonDown(button);
+                return rawDown || (isDownThisFrame && !wasDownLastFrame);
             }
         }
 
@@ -148,10 +156,12 @@ namespace OpenPointerCapture
             }
             else
             {
-                // If not captured, use Unity's default Input
+                // If not captured, use Unity's default Input - same Display 2 suppression as
+                // GetMouseButtonDown above.
                 bool wasDownLastFrame = lastButtonState.ContainsKey(button) ? lastButtonState[button] : false;
                 bool isDownThisFrame = currentButtonState.ContainsKey(button) ? currentButtonState[button] : false;
-                return Input.GetMouseButtonUp(button) || (!isDownThisFrame && wasDownLastFrame);
+                bool rawUp = !DualDisplayTouch.IsDisplay2TouchActive() && Input.GetMouseButtonUp(button);
+                return rawUp || (!isDownThisFrame && wasDownLastFrame);
             }
         }
 
@@ -170,9 +180,11 @@ namespace OpenPointerCapture
             }
             else
             {
-                // If not captured, use Unity's default Input
+                // If not captured, use Unity's default Input - same Display 2 suppression as
+                // GetMouseButtonDown above.
                 bool isDownThisFrame = currentButtonState.ContainsKey(button) ? currentButtonState[button] : false;
-                return Input.GetMouseButton(button) || isDownThisFrame;
+                bool rawHeld = !DualDisplayTouch.IsDisplay2TouchActive() && Input.GetMouseButton(button);
+                return rawHeld || isDownThisFrame;
             }
         }
 
@@ -234,7 +246,13 @@ namespace OpenPointerCapture
             }
             else
             {
-                // If not captured, use Unity's default Input system for all axes
+                // If not captured, use Unity's default Input system for all axes. Mouse X/Y is
+                // what InputManager.UpdateControllerCursorPosition() reads to detect a drag and
+                // drop out of controller-cursor mode - without this, a drag on Display 2 would
+                // leak into that same check and affect Display 1's cursor mode.
+                if ((axisName == "Mouse X" || axisName == "Mouse Y") && DualDisplayTouch.IsDisplay2TouchActive())
+                    return 0f;
+
                 if (axisName == "Mouse ScrollWheel")
                     return Input.GetAxis(axisName) + capturedScrollDeltaThisFrame.y;
 

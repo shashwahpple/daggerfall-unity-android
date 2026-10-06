@@ -868,9 +868,13 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
         // location-select at wherever the finger happened to lift - see suppressNextClick.
         protected virtual void HandleTouchZoomPan(Vector2 currentMousePos)
         {
-            if (Input.touchCount == 1)
+            // Legacy Input.touchCount/GetTouch carry no display attribution (Android's touch
+            // emulation treats a Display 2 touch as if it landed on Display 1 at the same raw
+            // coordinates) - filter through DualDisplayTouch so a Display 2 tap can't be
+            // miscounted as a second finger here or misread as a pan/pinch gesture.
+            if (DualDisplayTouch.Display1TouchCount() == 1)
             {
-                Touch touch = Input.GetTouch(0);
+                Touch touch = DualDisplayTouch.GetDisplay1Touch(0);
                 if (touch.phase == TouchPhase.Began)
                 {
                     touchPanDistance = 0f;
@@ -901,10 +905,10 @@ namespace DaggerfallWorkshop.Game.UserInterfaceWindows
                     lastPanTouchPos = currentMousePos;
                 }
             }
-            else if (Input.touchCount == 2)
+            else if (DualDisplayTouch.Display1TouchCount() == 2)
             {
-                Touch touchZero = Input.GetTouch(0);
-                Touch touchOne = Input.GetTouch(1);
+                Touch touchZero = DualDisplayTouch.GetDisplay1Touch(0);
+                Touch touchOne = DualDisplayTouch.GetDisplay1Touch(1);
 
                 if (touchZero.phase == TouchPhase.Began || touchOne.phase == TouchPhase.Began)
                 {
